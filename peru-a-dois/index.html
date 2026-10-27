@@ -1043,7 +1043,7 @@ async function initCaps(){
     const prevMine = VOTES[p];
     VOTES[p] = {scores:{...(d.scores||{})}, duels:{...(d.duels||{})}};
     if(p===ME && pendingSave) { VOTES[p] = prevMine; }
-    render();
+    render(); checkMatches();
   }, e=>console.warn(e));
   db.doc("meta/adjust").onSnapshot(snap=>{ const d=snap.exists?snap.data():{}; ADJ={pin:d.pin||[],cut:d.cut||[],tier:d.tier||null}; if(ADJ.tier) tier=ADJ.tier; render(); });
   db.doc("meta/photos").onSnapshot(snap=>{ const d=snap.exists?snap.data():{}; PHOTOS={}; for(const [k,v] of Object.entries(d.map||{})) PHOTOS[k]="/_blob/"+v; render(); });
@@ -1278,11 +1278,28 @@ function rate(id,score,card,dir){
   const inSheet = card && card.closest(".sheet");
   if(inSheet){ openItem(id); render(); return; }
   if(card){ card.classList.add("fly"); const d=dir||(score>=6?1:score<=4?-1:0); card.style.transform=`translate(${d*130}%, ${d?-10:-120}px) rotate(${d*18}deg)`; card.style.opacity="0"; }
-  setTimeout(()=>{ renderCards(); renderHeader(); if(pv!=null&&pv>=8&&score>=8) matchPop(id); },card?260:0);
+  setTimeout(()=>{ renderCards(); renderHeader(); checkMatches(); },card?260:0);
 }
-function matchPop(id){
-  const d=document.createElement("div"); d.className="matchpop"; d.innerHTML=`<div><h2>Match!</h2><p><b>${esc(ITEM[id].name)}</b><br>vocês dois deram 8 ou mais.</p><button class="btn primary">Continuar</button></div>`;
-  d.onclick=()=>d.remove(); document.body.append(d); setTimeout(()=>d.remove(),2600);
+/* Matches (both ≥8) pop up on BOTH phones: whoever closes the match sees it right away, the other
+   sees it live, or on the next visit if the app was closed. Seen matches are remembered per person. */
+function currentMatches(){ return ITEMS.filter(it=>{ const a=sc("p1",it.id), b=sc("p2",it.id); return a!=null&&b!=null&&a>=8&&b>=8; }).map(it=>it.id); }
+function checkMatches(){
+  if(!ME || (db && !(LOADED.p1&&LOADED.p2))) return;
+  const key="seenMatches."+ME; const seen=new Set(LS.get(key,[]));
+  const now=currentMatches(); const fresh=now.filter(id=>!seen.has(id));
+  LS.set(key,now);
+  if(fresh.length) matchPop(fresh);
+}
+function matchPop(ids){
+  document.querySelector(".matchpop")?.remove();
+  const o=NAMES[other(ME)]||"Seu par";
+  const one=ids.length===1;
+  const d=document.createElement("div"); d.className="matchpop"; d.setAttribute("role","dialog");
+  d.innerHTML=`<div><h2>${one?"Match!":ids.length+" matches!"}</h2>
+    <p>${one?`<b>${esc(ITEM[ids[0]].name)}</b><br>`:`<b>${ids.slice(0,6).map(i=>esc(ITEM[i].name)).join(", ")}${ids.length>6?"…":""}</b><br>`}você e ${esc(o)} deram 8 ou mais.</p>
+    <div class="actions" style="justify-content:center">${one?`<button class="btn" data-see="${ids[0]}">Ver card</button>`:""}<button class="btn primary" data-ok>Continuar</button></div></div>`;
+  d.addEventListener("click",e=>{ const see=e.target.closest("[data-see]"); if(see){ d.remove(); openItem(see.dataset.see); return; } if(e.target===d||e.target.closest("[data-ok]")) d.remove(); });
+  document.body.append(d);
 }
 function bindSwipe(card,it){
   let sx=0,sy=0,dx=0,drag=false,id=null;
