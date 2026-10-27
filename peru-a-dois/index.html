@@ -1191,6 +1191,7 @@ const PRIOS = {
 let optPrio = LS.get("optPrio","equilibrio");
 const LIMA_POOL=["callao-lobos","pachacamac","museo-larco","barranco","lima-centro","circuito-agua","parapente","surf-lima","bike-malecon","mate","surquillo","aula-culinaria","larcomar"];
 const VALE_POOL=["chinchero","maras","via-ferrata","mil","feira-pisac"];
+const CITY_LIGHT=["sacsayhuaman","san-pedro","san-blas","pisac","ollantaytambo"]; // short visits the plan routes also squeeze into Cusco/Vale days
 const FREE_POOL=["humantay","vinicunca","palccoyo","ausangate-7","rafting","quadriciclo","cusco-pe"];
 const tierCost = c => tier==="econ"?c[0]: tier==="conf"?c[1] : (c[0]+c[1])/2;
 // pinned +6, cut −6; items nobody rated yet get a small nudge from their public rating so the plan isn't empty
@@ -1212,7 +1213,7 @@ function planDays(spec){
   }
   for(let i=0;i<spec.lima;i++){
     const ids=take(topFrom(LIMA_POOL,2,used)); const act=ids.reduce((s,x)=>s+ITEM[x].price,0);
-    day({t:"Lima: "+(ids.length?ids.map(x=>ITEM[x].name).join(" e "):"dia livre em Miraflores e Barranco"),s:"Lima",e:ids.some(x=>ITEM[x].eff>=1)?1:0,ids,r:"lima",cost:[500+act,900+act],h:1});
+    day({t:"Lima: "+(ids.length?ids.map(x=>ITEM[x].name).join(" e "):"dia livre em Miraflores e Barranco"),s:"Lima",e:ids.some(x=>ITEM[x].eff>=1)?1:0,ids,r:"lima",cost:[270+act,560+act],h:1}); // plan's Lima day ≈ R$ 770 with Callao + Pachacamac
   }
   if(spec.huaraz){
     const prev=D[D.length-1]; prev.t+=", à noite ônibus-leito para Huaraz (~8h)"; prev.s="no ônibus"; prev.cost=[prev.cost[0]-150,prev.cost[1]-350]; prev.h+=8*0.5; prev.move="ônibus noturno";
@@ -1253,6 +1254,15 @@ function planDays(spec){
 function dayLabels(n){ const fri=(duelAvg("dates")||0)>0; const wd=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"]; const start=fri?5:6, d0=fri?3:4;
   return [...Array(n)].map((_,i)=>`${wd[(start+i)%7]} ${d0+i}/9${d0+i===7?" (feriado)":""}`); }
 
+const FIXED_COSTS={econ:5080+400+460, meio:5720+400+560, conf:7450+400+660}; // flight, insurance, local transport
+const rawBase = D => (D.reduce((s,d)=>s+tierCost(d.cost),0)+FIXED_COSTS[tier])*INFL;
+/* Calibrate the day-by-day estimate against the plan's own totals: rebuild A, B and C from the same blocks
+   and scale so they cost exactly what the document says. Keeps both kinds of route on one ruler. */
+const PLAN_EQUIV={A:{core:"train",costa:3,huaraz:0,vale:0,lima:0,free:1}, B:{core:"train",costa:0,huaraz:3,vale:0,lima:1,free:0}, C:{core:"ij",costa:0,huaraz:0,vale:0,lima:1,free:2}};
+const _cal={};
+function calibration(){ if(_cal[tier]) return _cal[tier];
+  let plan=0, mine=0; for(const k of ["A","B","C"]){ plan+=ROUTES[k].cost[tier]; mine+=rawBase(planDays(PLAN_EQUIV[k]).D); }
+  return _cal[tier]=plan/mine; }
 function evalSpec(spec){
   const {D,used}=planDays(spec); if(D.length!==10) return null;
   const labels=dayLabels(10); D.forEach((d,i)=>d.d=labels[i]);
@@ -1267,16 +1277,15 @@ function evalSpec(spec){
     if(spec.core==="train" && c("hiram")>=8){ adds.push(["Hiram Bingham na ida (luxo)",3200]); incl.add("hiram"); td.train="Hiram Bingham na ida, "+td.train; } }
   // food & restaurant encaixes in visited regions
   const regions=new Set(D.map(d=>d.r)); const thr=paceThreshold(); let extra=0; const byR={};
-  for(const it of ITEMS){ if(incl.has(it.id)||!it.routes.includes("x")||["trem","hotel"].includes(it.cat)) continue;
+  for(const it of ITEMS){ if(incl.has(it.id)||["trem","hotel"].includes(it.cat)) continue;
+    if(!(it.routes.includes("x")||LIMA_POOL.includes(it.id)||CITY_LIGHT.includes(it.id))) continue; // same fit-in rule as the plan routes
     if(!(regions.has(it.region)||it.region==="peru")) continue; if(c(it.id)<thr) continue;
-    if(LIMA_POOL.includes(it.id)||VALE_POOL.includes(it.id)||FREE_POOL.includes(it.id)||["huayna-picchu","montana-mp"].includes(it.id)) continue;
+    if(FREE_POOL.includes(it.id)||it.id==="via-ferrata"||["huayna-picchu","montana-mp"].includes(it.id)) continue; // these need a day of their own
     incl.add(it.id); if(it.cat!=="prato"){ extra+=it.price; (byR[it.region]||=[]).push(it); } }
   for(const d of D){ if(byR[d.r]&&d.s!=="em voo"){ d.extras=byR[d.r]; delete byR[d.r]; } }
   if(extra) adds.push(["Encaixes: restaurantes, lojas e experiências que vocês querem",extra]);
   // cost
-  const fixed = {econ:[5080,400,460],meio:[5720,400,560],conf:[7450,400,660]}[tier].reduce((a,b)=>a+b,0);
-  const daysCost=D.reduce((s,d)=>s+tierCost(d.cost),0);
-  const base=(daysCost+fixed)*INFL; const addsTotal=adds.reduce((s,a)=>s+a[1],0)*INFL; const total=base+addsTotal;
+  const base=rawBase(D)*calibration(); const addsTotal=adds.reduce((s,a)=>s+a[1],0)*INFL; const total=base+addsTotal;
   // value & penalties
   let value=0; for(const id of incl){ const it=ITEM[id]; if(!it||it.cat==="prato") continue; value+=val(id); }
   for(const id of ADJ.pin) if(!incl.has(id)) value-=4;
@@ -1314,6 +1323,16 @@ function optimize(){
   }
   out.sort((a,b)=>b.score-a.score);
   return out;
+}
+/* Never suggest something worse than the plan's own routes: outside "Economia", the pick must match at least
+   the best plan route's coverage; in "Economia" it must be cheaper than the cheapest plan route. */
+function rankOptimized(all,plan){
+  const bestPct=Math.max(...plan.map(o=>o.pct)), minCost=Math.min(...plan.map(o=>o.total));
+  const cheapPlan=plan.find(o=>o.total===minCost);
+  // Economia: cheaper than the cheapest plan route without matching less than it
+  const ok = optPrio==="economia" ? all.filter(o=>o.total<=minCost && o.pct>=cheapPlan.pct-0.5) : all.filter(o=>o.pct>=bestPct-0.5);
+  const rest = all.filter(o=>!ok.includes(o));
+  return {list: ok.concat(rest), guaranteed: ok.length>0, bestPct, minCost};
 }
 function reasonsFor(o,alts){
   const r=[]; const loved=[...o.incl].filter(id=>bucketOf(id)==="love").map(id=>ITEM[id].name);
@@ -1585,7 +1604,7 @@ function renderRoutes(){
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div class="seg" role="group" aria-label="Faixa de gasto">${Object.entries(TIERS).map(([k,l])=>`<button aria-pressed="${tier===k}" data-tier="${k}">${l[0].toUpperCase()+l.slice(1)}</button>`).join("")}</div>${st&&st!==tier?`<span class="note">Pelos duelos, vocês tendem a ${TIERS[st]}.</span>`:""}</div>
     ${(ADJ.pin.length||ADJ.cut.length)?`<div class="note">Ajustes manuais: ${ADJ.pin.length?`fixados ${ADJ.pin.map(i=>esc(ITEM[i]?.name)).join(", ")}`:""}${ADJ.pin.length&&ADJ.cut.length?" · ":""}${ADJ.cut.length?`tirados ${ADJ.cut.map(i=>esc(ITEM[i]?.name)).join(", ")}`:""} <button class="btn small" id="clearAdj">Limpar</button></div>`:""}
   </div>`;
-  const all=optimize(); const kind=o=>[o.spec.core,o.spec.costa>0,o.spec.huaraz>0].join(); const picks=[];
+  const ranked=rankOptimized(optimize(),opts); const all=ranked.list; const kind=o=>[o.spec.core,o.spec.costa>0,o.spec.huaraz>0].join(); const picks=[];
   for(const o of all){ if(picks.length>=3) break; if(picks.some(p=>kind(p)===kind(o))) continue; picks.push(o); }
   for(const o of all){ if(picks.length>=3) break; if(!picks.includes(o)) picks.push(o); }
   if(openOpt==="" || openOpt==null) {} 
@@ -1597,7 +1616,10 @@ function renderRoutes(){
       <div class="opt-h"><span class="eyebrow">${i===0?"Sugestão otimizada · "+PRIOS[optPrio].label:"Alternativa "+i}</span><h3>${esc(o.R.name)}</h3>
         <div class="meter"><b>${Math.round(o.pct)}%</b><div class="bar"><i style="width:${o.pct}%"></i></div><span>do que vocês querem</span></div>
         <div class="grid4"><div class="mini"><span>Total do casal</span><b>${brlK(o.total)}</b></div><div class="mini"><span>Cidades</span><b>${o.R.cities}</b></div><div class="mini"><span>Deslocamentos</span><b>${esc(o.R.moves)}</b></div><div class="mini"><span>Em trânsito</span><b>${esc(o.R.ground)}</b></div></div>
-        ${i===0?`<ul class="list-in">${reasonsFor(o,all).map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
+        ${i===0?`<ul class="list-in">${(()=>{ const pb=[...opts].sort((a,b)=>b.pct-a.pct)[0]; const r=reasonsFor(o,all);
+          r.unshift(optPrio==="economia" ? `Comparado ao roteiro do plano mais barato: ${brlK(Math.abs(ranked.minCost-o.total))} ${o.total<=ranked.minCost?"mais barato":"mais caro"}, com ${Math.round(o.pct)}% de match.`
+            : `Comparado ao melhor roteiro do plano (${pb.key}, ${Math.round(pb.pct)}%): ${Math.round(o.pct-pb.pct)>=0?"+":""}${Math.round(o.pct-pb.pct)} pontos de match e ${o.total<=pb.total?brlK(pb.total-o.total)+" mais barato":brlK(o.total-pb.total)+" mais caro"}.`);
+          return r; })().map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
         <button class="btn small" data-toggle="${o.key}" style="justify-self:start">${isOpen?"Recolher":"Ver dia a dia, custos e o que fica de fora"}</button>
       </div>
       ${isOpen?optBody(o):""}
@@ -1704,7 +1726,7 @@ function contextForClaude(){
   for(const it of ITEMS){ const a=sc("p1",it.id), b=sc("p2",it.id); if(a==null&&b==null) continue; lines.push(`${it.id} | ${it.name} | ${REGIONS[it.region]} | R$${it.price} | ${NAMES.p1}:${a??"-"} ${NAMES.p2}:${b??"-"}${isPinned(it.id)?" | FIXADO":""}${isCut(it.id)?" | TIRADO":""}`); }
   const du=DUELS.map(d=>{const a=duelVal("p1",d.id),b=duelVal("p2",d.id); if(a==null&&b==null) return null; return `${d.q} [${sideInfo(d.a).label} × ${sideInfo(d.b).label}] ${NAMES.p1}:${a??"-"} ${NAMES.p2}:${b??"-"} (−5 = esquerda, +5 = direita)`}).filter(Boolean);
   const opts=allOptions().map(o=>`Roteiro ${o.key} (${o.R.name}): match ${Math.round(o.pct)}%, total ~${brl(o.total)} na faixa ${TIERS[tier]}. Dias: ${o.days.map(d=>`${d.d}: ${d.t} (dorme ${d.s})${d.extras?.length?" + "+d.extras.map(e=>e.name).join(", "):""}`).join(" / ")}. Ajustes de custo: ${o.adds.map(a=>a[0]+" "+brl(a[1]*INFL)).join("; ")||"nenhum"}. Fica de fora com nota alta: ${o.missed.slice(0,8).map(i=>i.name).join(", ")||"nada"}.`);
-  const best=optimize()[0]; if(best) opts.unshift(`SUGESTÃO OTIMIZADA pelo app (prioridade ${PRIOS[optPrio].label}): ${best.R.name}, match ${Math.round(best.pct)}%, total ~${brl(best.total)}, ${best.R.ground}. Dias: ${best.days.map(d=>`${d.d}: ${d.t} (dorme ${d.s})`).join(" / ")}.`);
+  const best=rankOptimized(optimize(),allOptions()).list[0]; if(best) opts.unshift(`SUGESTÃO OTIMIZADA pelo app (prioridade ${PRIOS[optPrio].label}): ${best.R.name}, match ${Math.round(best.pct)}%, total ~${brl(best.total)}, ${best.R.ground}. Dias: ${best.days.map(d=>`${d.d}: ${d.t} (dorme ${d.s})`).join(" / ")}.`);
   return `${DOC_DIGEST}\n\nCASAL: ${NAMES.p1} e ${NAMES.p2}.\n\nNOTAS (0 a 10) — id | nome | região | preço casal | notas:\n${lines.join("\n")||"(ninguém votou ainda)"}\n\nDUELOS:\n${du.join("\n")||"(nenhum)"}\n\nROTEIROS CALCULADOS PELO APP:\n${opts.join("\n")}\n\nIDs válidos para ajustes: ${ITEMS.map(i=>i.id).join(", ")}`;
 }
 async function askClaude(){
