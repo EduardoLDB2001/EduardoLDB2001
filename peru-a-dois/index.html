@@ -1012,6 +1012,7 @@ let PHOTOS = {};
 let db=null, user=null, sample=null, assets=null, myUid=null, META={};
 const skipSet=new Set();
 const LOADED={p1:false,p2:false};
+const LASTSEEN={p1:0,p2:0};
 let tab = "cards", catFilter = "all", tier = LS.get("tier","meio"), lastRated=[];
 
 const $ = (s,el=document)=>el.querySelector(s);
@@ -1036,6 +1037,9 @@ async function initCaps(){
     const d = snap.exists?snap.data():{};
     LOADED[p]=true;
     if(p===ME && snap.metadata.hasPendingWrites) return;
+    const ts=d.updatedAt||0; // drop stale deliveries older than what this device already has
+    if(ts < LASTSEEN[p] || (p===ME && ts < myLastSave)) return;
+    LASTSEEN[p]=ts;
     const prevMine = VOTES[p];
     VOTES[p] = {scores:{...(d.scores||{})}, duels:{...(d.duels||{})}};
     if(p===ME && pendingSave) { VOTES[p] = prevMine; }
@@ -1048,13 +1052,13 @@ async function initCaps(){
 function loadLocal(){ VOTES = LS.get("votes",VOTES); NAMES = LS.get("names",NAMES); ADJ = LS.get("adj",ADJ); CHAT = LS.get("chat",[]); if(!ME) openOnboarding(); }
 function setBanner(t){ const b=$("#banner"); b.textContent=t; b.hidden=!t; }
 
-let saveTimer=null, pendingSave=false;
+let saveTimer=null, pendingSave=false, myLastSave=0;
 function saveMine(){
   if(!ME) return;
   if(!db){ LS.set("votes",VOTES); return; }
   if(!LOADED[ME]) return;
   pendingSave=true; clearTimeout(saveTimer);
-  saveTimer=setTimeout(async()=>{ try{ await db.doc("votes/"+ME).set({scores:VOTES[ME].scores, duels:VOTES[ME].duels, updatedAt:Date.now()}); }catch(e){ handleWriteErr(e) } pendingSave=false; },600);
+  saveTimer=setTimeout(async()=>{ const ts=Date.now(); myLastSave=ts; try{ await db.doc("votes/"+ME).set({scores:VOTES[ME].scores, duels:VOTES[ME].duels, updatedAt:ts}); }catch(e){ handleWriteErr(e) } pendingSave=false; },600);
 }
 function handleWriteErr(e){ console.warn(e); if(e?.code==="invalid_argument") setBanner("Sem permissão para salvar. Peça para o dono compartilhar o link com você como Editor."); else toast("Não consegui salvar agora. Tente de novo."); }
 async function saveMeta(patch){ META={...META,...patch}; if(!db){ if(patch.names) LS.set("names",NAMES); return; } try{ await db.doc("meta/couple").set(META); }catch(e){ handleWriteErr(e) } }
