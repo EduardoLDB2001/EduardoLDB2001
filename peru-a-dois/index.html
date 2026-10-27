@@ -1176,6 +1176,160 @@ function routeDuelBonus(k){
   return s/2;
 }
 function allOptions(){ return ["A","B","C"].map(buildOption).sort((x,y)=>y.pct-x.pct); }
+/* ============================================================
+   OPTIMIZER — builds new itineraries from day blocks, under the plan's rules:
+   1st night in Lima, sea level → Vale (2.900 m) → Cusco (3.400 m) → high treks,
+   never two long transfers on the same day, no backtracking, Machu Picchu with guide.
+   Costs per day are the plan's daily values for the couple [mochilão, confortável].
+   ============================================================ */
+const PRIOS = {
+  equilibrio:{label:"Equilíbrio", cost:0.45, transit:0.3, heavy:1.5, moves:0.6},
+  economia:{label:"Economia", cost:1.3, transit:0.25, heavy:1.2, moves:0.5},
+  experiencias:{label:"Mais experiências", cost:0.15, transit:0.12, heavy:0.6, moves:0.3},
+  descanso:{label:"Mais descanso", cost:0.4, transit:0.7, heavy:3.5, moves:1.2},
+};
+let optPrio = LS.get("optPrio","equilibrio");
+const LIMA_POOL=["callao-lobos","pachacamac","museo-larco","barranco","lima-centro","circuito-agua","parapente","surf-lima","bike-malecon","mate","surquillo","aula-culinaria","larcomar"];
+const VALE_POOL=["chinchero","maras","via-ferrata","mil","feira-pisac"];
+const FREE_POOL=["humantay","vinicunca","palccoyo","ausangate-7","rafting","quadriciclo","cusco-pe"];
+const tierCost = c => tier==="econ"?c[0]: tier==="conf"?c[1] : (c[0]+c[1])/2;
+// pinned +6, cut −6; items nobody rated yet get a small nudge from their public rating so the plan isn't empty
+const val = id => { const v=c(id); if(v<0) return -6; if(v>10) return 6; if(combined(id)==null) return Math.max(-1,Math.min(1.2,(ITEM[id].rate-4.45)*2.5)); return v-5; };
+function topFrom(pool,n,used,minV=0.5){ return pool.filter(id=>!used.has(id)).map(id=>[id,val(id)]).filter(x=>x[1]>=minV).sort((a,b)=>b[1]-a[1]).slice(0,n).map(x=>x[0]); }
+
+function planDays(spec){
+  // spec: {lima, costa(0|2|3), huaraz(0|2|3 days in Huaraz), core:"train"|"ij", vale(0|1), free}
+  const used=new Set(); const D=[]; const take=ids=>{ ids.forEach(i=>used.add(i)); return ids; };
+  const day=(o)=>{ D.push({e:0,h:0,move:null,ids:[],...o}); return D[D.length-1]; };
+  day({t:"Chegada em Lima (voo direto de Brasília), Huaca Pucllana e Miraflores",s:"Lima",ids:take(["huaca-pucllana","miraflores"]),r:"lima",cost:[560,1040],h:0,move:"voo internacional"});
+  if(spec.costa){
+    day({t:"Ônibus Lima–Paracas (~4h) e Reserva de Paracas",s:"Paracas",ids:take(["paracas"]),r:"costa",cost:[614,1150],h:4,move:"ônibus",lux:"paracas"});
+    const ex = val("jubartes")>=0?["jubartes"]:[];
+    if(spec.costa===3){
+      day({t:"Ilhas Ballestas"+(ex.length?" e jubartes":"")+", ônibus para Huacachina, buggy e sandboard",s:"Huacachina",e:1,ids:take(["ballestas",...ex,"huacachina"].concat(val("ica-bodegas")>0?["ica-bodegas"]:[])),r:"costa",cost:[1240,2510],h:1.5,move:"ônibus"});
+      day({t:"Ônibus Huacachina–Lima (~4h30), noite em Lima",s:"Lima",ids:[],r:"lima",cost:[700,1200],h:4.5,move:"ônibus"});
+    } else day({t:"Ilhas Ballestas"+(ex.length?" e jubartes":"")+" de manhã, ônibus de volta a Lima (~4h)",s:"Lima",ids:take(["ballestas",...ex]),r:"lima",cost:[900,1500],h:4,move:"ônibus"});
+  }
+  for(let i=0;i<spec.lima;i++){
+    const ids=take(topFrom(LIMA_POOL,2,used)); const act=ids.reduce((s,x)=>s+ITEM[x].price,0);
+    day({t:"Lima: "+(ids.length?ids.map(x=>ITEM[x].name).join(" e "):"dia livre em Miraflores e Barranco"),s:"Lima",e:ids.some(x=>ITEM[x].eff>=1)?1:0,ids,r:"lima",cost:[500+act,900+act],h:1});
+  }
+  if(spec.huaraz){
+    const prev=D[D.length-1]; prev.t+=", à noite ônibus-leito para Huaraz (~8h)"; prev.s="no ônibus"; prev.cost=[prev.cost[0]-150,prev.cost[1]-350]; prev.h+=8*0.5; prev.move="ônibus noturno";
+    day({t:"Chegada em Huaraz de manhã, descanso e aclimatação na cidade",s:"Huaraz",ids:take(["huaraz"].concat(val("monterrey")>0?["monterrey"]:[])),r:"huaraz",cost:[390,780]});
+    if(spec.huaraz===3){ const pick=val("pastoruri")>val("churup")?"pastoruri":"churup";
+      day({t:pick==="churup"?"Laguna Churup (trilha moderada, aclimatação)":"Geleira Pastoruri (caminhada leve a 5.240 m)",s:"Huaraz",e:pick==="churup"?1:0,ids:take([pick]),r:"huaraz",cost:[550,1130],h:2}); }
+    day({t:"Laguna 69 (4.600 m, dia inteiro), à noite ônibus-leito de volta a Lima",s:"no ônibus",e:2,ids:take(["laguna-69"]),r:"huaraz",cost:[870,1510],h:2+8*0.5,move:"ônibus noturno"});
+  }
+  day({t:spec.huaraz?"Chegada em Lima de manhã, voo Lima–Cusco à tarde, descanso":"Voo Lima–Cusco, descanso para a altitude e Plaza de Armas",s:"Cusco",ids:take(["cusco-centro"]),r:"cusco",cost:[1040,1560],h:4,move:"voo"});
+  const freeIds=[]; for(let i=0;i<spec.free;i++){ const p=topFrom(FREE_POOL.filter(x=>x!=="cusco-pe"),1,new Set([...used,...freeIds]))[0]; freeIds.push(p||"cusco-pe"); }
+  let restN=0;
+  const freeDay=(id)=>{ const it=ITEM[id]; const rest=id==="cusco-pe"||!id; if(rest) restN++;
+    return day({t:rest?(restN>1?"Dia livre em Cusco: dormir até tarde, cafés, Qorikancha e compras":"Cusco a pé: San Blas, Sacsayhuamán, mercado San Pedro e compras (dia leve)"):it.name+(it.eff===2?" (dia inteiro, saída de madrugada)":""),s:"Cusco",e:rest?0:it.eff,ids:take(rest?["cusco-pe","san-blas","san-pedro","sacsayhuaman"].filter(x=>!used.has(x)):[id]),r:"cusco",cost:[650+(rest?0:it.price),1170+(rest?0:it.price)],h:rest?0:5,move:null,free:true}); };
+  if(spec.core==="train"){
+    if(spec.vale){ const ids=take(topFrom(VALE_POOL,2,used,0)); day({t:"Vale Sagrado: "+(ids.length?ids.map(x=>ITEM[x].name).join(" e "):"Chinchero e Maras"),s:"Vale Sagrado",e:ids.some(x=>ITEM[x].eff===2)?2:1,ids,r:"vale",cost:[700+ids.reduce((s,x)=>s+ITEM[x].price,0),1300+ids.reduce((s,x)=>s+ITEM[x].price,0)],h:2}); }
+    day({t:"Vale Sagrado: Pisac, Moray e Ollantaytambo",s:"Ollantaytambo",e:1,ids:take(["pisac","moray","ollantaytambo"].concat(val("feira-pisac")>0?["feira-pisac"]:[])),r:"vale",cost:[910,1820],h:2,lux:"vale"});
+    day({t:"Trem para Aguas Calientes, termas e vila",s:"Aguas Calientes",ids:take(["aguas-termas"]),r:"mp",cost:[1380,2320],h:1.7,move:"trem",train:true});
+    const mx = topFrom(["huayna-picchu","montana-mp"],1,used,1);
+    day({t:"Machu Picchu com guia"+(mx.length?" + "+ITEM[mx[0]].name:"")+", trem e van de volta a Cusco",s:"Cusco",e:2,ids:take(["machu-picchu",...mx]),r:"mp",cost:[2095+(mx.length?ITEM[mx[0]].price:0),3605+(mx.length?ITEM[mx[0]].price:0)],h:3.5,move:"trem"});
+    freeIds.forEach(freeDay);
+  } else {
+    // Inca Jungle starts at ~4.300 m: put the Vale (low) and a light day first to acclimatize
+    if(spec.vale) day({t:"Vale Sagrado: Pisac e Ollantaytambo (bate-volta)",s:"Cusco",e:1,ids:take(["pisac","ollantaytambo"].concat(val("feira-pisac")>0?["feira-pisac"]:[])),r:"vale",cost:[680,1560],h:3});
+    // acclimatization day before the bike descent from ~4.300 m: only something light and low
+    const li = freeIds.findIndex(x=>ITEM[x].eff===0 && parseInt((ITEM[x].alt||"0").replace(".",""))<4000);
+    const light = freeIds.length ? (li>=0 ? freeIds.splice(li,1)[0] : (freeIds.pop(), "cusco-pe")) : null;
+    if(light) freeDay(light);
+    day({t:"Inca Jungle 1: bike descendo desde ~4.300 m",s:"Santa María",e:2,ids:take(["inca-jungle"]),r:"mp",cost:[1670,2300],h:3,move:"van"});
+    day({t:"Inca Jungle 2: trilha, tirolesa e termas de Cocalmayo",s:"Santa Teresa",e:2,ids:take(["tirolesa","cocalmayo"]),r:"mp",cost:[1670,2300],h:1});
+    day({t:"Inca Jungle 3: caminhada até Aguas Calientes",s:"Aguas Calientes",e:1,ids:[],r:"mp",cost:[1670,2300],h:1});
+    const mx = topFrom(["huayna-picchu","montana-mp"],1,used,1);
+    day({t:"Machu Picchu com guia"+(mx.length?" + "+ITEM[mx[0]].name:"")+", trem e van de volta a Cusco",s:"Cusco",e:2,ids:take(["machu-picchu",...mx]),r:"mp",cost:[935,1455],h:3.5,move:"trem",train:true});
+    freeIds.forEach(freeDay);
+  }
+  day({t:"Voo Cusco–Lima de manhã, Lima–Brasília à noite",s:"em voo",ids:[],r:"lima",cost:[840,1060],h:2,move:"voo"});
+  return {D,used};
+}
+function dayLabels(n){ const fri=(duelAvg("dates")||0)>0; const wd=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"]; const start=fri?5:6, d0=fri?3:4;
+  return [...Array(n)].map((_,i)=>`${wd[(start+i)%7]} ${d0+i}/9${d0+i===7?" (feriado)":""}`); }
+
+function evalSpec(spec){
+  const {D,used}=planDays(spec); if(D.length!==10) return null;
+  const labels=dayLabels(10); D.forEach((d,i)=>d.d=labels[i]);
+  const incl=new Set(used); const adds=[]; const notes=[];
+  // luxury / train upgrades driven by votes
+  const vn=D.find(d=>d.lux==="vale");
+  if(vn){ const best=VALE_LUX.filter(id=>c(id)>=7).sort((a,b)=>c(b)-c(a)||ITEM[a].price-ITEM[b].price)[0]; if(best){ vn.s=ITEM[best].name; vn.chg=true; adds.push([`Noite no ${ITEM[best].name}`,ITEM[best].price]); incl.add(best);} }
+  const pn=D.find(d=>d.lux==="paracas"); if(pn && c("paracas-luxo")>=7){ pn.s="Hotel de luxo em Paracas"; pn.chg=true; adds.push(["Hotel de luxo em Paracas",1040]); incl.add("paracas-luxo"); }
+  const td=D.find(d=>d.train); if(td){ const legs=spec.core==="train"?2:1, base=spec.core==="train"?1765:1070;
+    const bt=TRAINS.filter(id=>!isCut(id)).map(id=>[id,c(id)]).sort((a,b)=>b[1]-a[1])[0];
+    if(bt&&bt[1]>=5){ adds.push([`Trem ${ITEM[bt[0]].name}`,ITEM[bt[0]].price*legs-base]); incl.add(bt[0]); td.train=ITEM[bt[0]].name; } else td.train=legs===2?"Expedition na ida, Vistadome na volta":"Vistadome (volta)";
+    if(spec.core==="train" && c("hiram")>=8){ adds.push(["Hiram Bingham na ida (luxo)",3200]); incl.add("hiram"); td.train="Hiram Bingham na ida, "+td.train; } }
+  // food & restaurant encaixes in visited regions
+  const regions=new Set(D.map(d=>d.r)); const thr=paceThreshold(); let extra=0; const byR={};
+  for(const it of ITEMS){ if(incl.has(it.id)||!it.routes.includes("x")||["trem","hotel"].includes(it.cat)) continue;
+    if(!(regions.has(it.region)||it.region==="peru")) continue; if(c(it.id)<thr) continue;
+    if(LIMA_POOL.includes(it.id)||VALE_POOL.includes(it.id)||FREE_POOL.includes(it.id)||["huayna-picchu","montana-mp"].includes(it.id)) continue;
+    incl.add(it.id); if(it.cat!=="prato"){ extra+=it.price; (byR[it.region]||=[]).push(it); } }
+  for(const d of D){ if(byR[d.r]&&d.s!=="em voo"){ d.extras=byR[d.r]; delete byR[d.r]; } }
+  if(extra) adds.push(["Encaixes: restaurantes, lojas e experiências que vocês querem",extra]);
+  // cost
+  const fixed = {econ:[5080,400,460],meio:[5720,400,560],conf:[7450,400,660]}[tier].reduce((a,b)=>a+b,0);
+  const daysCost=D.reduce((s,d)=>s+tierCost(d.cost),0);
+  const base=(daysCost+fixed)*INFL; const addsTotal=adds.reduce((s,a)=>s+a[1],0)*INFL; const total=base+addsTotal;
+  // value & penalties
+  let value=0; for(const id of incl){ const it=ITEM[id]; if(!it||it.cat==="prato") continue; value+=val(id); }
+  for(const id of ADJ.pin) if(!incl.has(id)) value-=4;
+  value += (spec.costa?routeDuelBonus("A"):0)*0.6 + (spec.huaraz?routeDuelBonus("B"):0)*0.6 + (spec.core==="ij"?routeDuelBonus("C"):0)*0.6;
+  const P=PRIOS[optPrio]; const paceAdj = (duelAvg("pace")||0)/5; // + = calmer
+  const transit=D.reduce((s,d)=>s+d.h,0);
+  const heavy=D.filter(d=>d.e===2).length; let streak=0; for(let i=1;i<D.length;i++) if(D[i].e===2&&D[i-1].e===2) streak++;
+  const sleeps=new Set(D.map(d=>d.s)).size; const hotelChanges=D.reduce((s,d,i)=>s+(i&&d.s!==D[i-1].s?1:0),0);
+  let risk=[]; if(spec.core==="ij" && !spec.vale && !spec.free) { value-=4; risk.push("Inca Jungle com só 2 noites em Cusco antes (aclimatação curta)"); }
+  if(spec.huaraz) risk.push("Noite no ônibus antes do voo para Cusco");
+  if(spec.costa===3) risk.push("Dois trechos de ônibus de ~4h na costa");
+  const score = value*1.0 - total/1000*P.cost - transit*P.transit*(1+paceAdj*.5) - (heavy*0.4+streak*2)*P.heavy*(1+paceAdj) - hotelChanges*0.25*P.moves;
+  // coverage
+  let want=0,got=0; const missed=[]; for(const it of ITEMS){ if(["prato","trem"].includes(it.cat)) continue; const v=c(it.id); if(v<6) continue; want+=v-5; if(incl.has(it.id)) got+=v-5; else missed.push(it); }
+  const lowIn=[...incl].filter(id=>{ const a=sc("p1",id), b=sc("p2",id); return a!=null&&b!=null&&a<=3&&b<=3; }).map(id=>ITEM[id]);
+  const cities=[...new Set(D.map(d=>d.s).filter(s=>!["no ônibus","em voo"].includes(s)))];
+  const bus=D.filter(d=>d.move&&d.move.startsWith("ônibus")).length, fl=2, tr=D.filter(d=>d.move==="trem").length;
+  const nd=(r)=>D.filter(d=>d.r===r&&d.s!=="em voo").length;
+  const name=[ `Lima (${nd("lima")} dia${nd("lima")>1?"s":""})`, spec.costa?"Paracas"+(spec.costa===3?" + Huacachina":""):"", spec.huaraz?`Huaraz (${spec.huaraz} dias)`:"", `Cusco (${nd("cusco")} dia${nd("cusco")>1?"s":""})`, spec.core==="train"||spec.vale?"Vale Sagrado":"", spec.core==="ij"?"Inca Jungle":"", "Machu Picchu"].filter(Boolean).join(" · ");
+  const sig=JSON.stringify(spec);
+  return {key:"S"+hash(sig)%100000, spec, sig, days:D, incl, adds, addsTotal, base, total, pct: want?got/want*100:0, missed:missed.sort((a,b)=>c(b.id)-c(a.id)), lowIn, notes,
+    extrasPeru:ITEMS.filter(it=>it.cat==="prato"&&incl.has(it.id)), score, transit, heavy, risk,
+    R:{name, cities:cities.length, moves:`${bus?bus+" ônibus, ":""}${fl} voos internos, ${tr} trem${tr>1?"s":""}${spec.core==="ij"?", vans da trilha":""}`,
+       nights:`${D.filter(d=>!["no ônibus","em voo"].includes(d.s)).length} em hotel${D.some(d=>d.s==="no ônibus")?" + "+D.filter(d=>d.s==="no ônibus").length+" no ônibus":""}`,
+       ground:`~${Math.round(transit)}h de deslocamento`, risk:risk.join("; ")||"Baixo: ritmo dentro das regras do plano", outTxt:""}, baseLabel:"Dias do roteiro, voos, seguro e transporte local"};
+}
+function optimize(){
+  const out=[];
+  for(const core of ["train","ij"]) for(const costa of [0,2,3]) for(const huaraz of [0,2,3]) for(const vale of [0,1]) for(let lima=0;lima<=3;lima++) for(let free=0;free<=4;free++){
+    const fixed=1+1+1+(core==="train"?3:4); if(fixed+costa+huaraz+vale+lima+free!==10) continue;
+    if(huaraz && lima<1) continue;          // night bus needs a Lima day before (never flight + bus on one day)
+    if(costa && huaraz && lima<1) continue;
+    if(costa && huaraz) continue;            // too much road for 10 days
+    const o=evalSpec({core,costa,huaraz,vale,lima,free}); if(o) out.push(o);
+  }
+  out.sort((a,b)=>b.score-a.score);
+  return out;
+}
+function reasonsFor(o,alts){
+  const r=[]; const loved=[...o.incl].filter(id=>bucketOf(id)==="love").map(id=>ITEM[id].name);
+  if(loved.length) r.push(`Inclui ${loved.length} coisa${loved.length>1?"s":""} que os dois amam: ${loved.slice(0,5).join(", ")}${loved.length>5?"…":""}.`);
+  const top=[...o.incl].filter(id=>ITEM[id].cat!=="prato").sort((a,b)=>c(b)-c(a)).slice(0,3).map(id=>ITEM[id].name);
+  if(!loved.length && top.length) r.push(`Prioriza o que tem as maiores notas: ${top.join(", ")}.`);
+  const cheaper=alts.filter(a=>a.total<o.total-500).sort((a,b)=>a.total-b.total)[0];
+  if(!o.pct && !cheaper) r.push("Ainda sem notas de vocês: por enquanto o app usa as avaliações públicas de cada lugar. Votem nos cards para personalizar.");
+  else if(cheaper && o.pct-cheaper.pct>=1) r.push(`Custa ${brlK(o.total-cheaper.total)} a mais que a opção mais barata, mas cobre ${Math.round(o.pct-cheaper.pct)} pontos a mais do que vocês querem.`);
+  else if(cheaper) r.push(`Custa ${brlK(o.total-cheaper.total)} a mais que a opção mais barata por ter menos estrada e um ritmo melhor.`);
+  else r.push("É uma das combinações mais baratas que respeitam as regras do plano.");
+  r.push(`${Math.round(o.transit)}h de deslocamento no total, ${o.heavy} dia${o.heavy!==1?"s":""} pesado${o.heavy!==1?"s":""}${o.days.some((d,i)=>i&&d.e===2&&o.days[i-1].e===2)?" (com dois seguidos)":", nunca dois seguidos"}.`);
+  const cut=o.missed.slice(0,3).map(i=>i.name); if(cut.length) r.push(`Fica de fora com nota alta: ${cut.join(", ")}. Não coube sem quebrar as regras de ritmo ou o orçamento.`);
+  return r;
+}
+
 
 /* ============================================================
    RENDER
@@ -1425,12 +1579,31 @@ const TIERS={econ:"econômica",meio:"meio-termo",conf:"confortável"};
 let openOpt=null;
 function renderRoutes(){
   const v=$("#v-routes"); const opts=allOptions(); const st=suggestedTier();
-  if(openOpt==null) openOpt=opts[0].key;
+  if(openOpt==null) openOpt="S";
   const cheapest = [...opts].sort((a,b)=>a.total-b.total)[0].key;
-  let html=`<div class="sec"><h2>Roteiros sob medida</h2><p class="lead">Os três roteiros do plano, ajustados pelas notas e duelos de vocês. O dia livre, o trem, o hotel especial e os encaixes mudam conforme o que vocês votaram.</p>
+  let html=`<div class="sec"><h2>Roteiros</h2><p class="lead">Uma sugestão montada do zero e os três roteiros do plano, todos ajustados pelas notas e duelos de vocês.</p>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div class="seg" role="group" aria-label="Faixa de gasto">${Object.entries(TIERS).map(([k,l])=>`<button aria-pressed="${tier===k}" data-tier="${k}">${l[0].toUpperCase()+l.slice(1)}</button>`).join("")}</div>${st&&st!==tier?`<span class="note">Pelos duelos, vocês tendem a ${TIERS[st]}.</span>`:""}</div>
     ${(ADJ.pin.length||ADJ.cut.length)?`<div class="note">Ajustes manuais: ${ADJ.pin.length?`fixados ${ADJ.pin.map(i=>esc(ITEM[i]?.name)).join(", ")}`:""}${ADJ.pin.length&&ADJ.cut.length?" · ":""}${ADJ.cut.length?`tirados ${ADJ.cut.map(i=>esc(ITEM[i]?.name)).join(", ")}`:""} <button class="btn small" id="clearAdj">Limpar</button></div>`:""}
   </div>`;
+  const all=optimize(); const kind=o=>[o.spec.core,o.spec.costa>0,o.spec.huaraz>0].join(); const picks=[];
+  for(const o of all){ if(picks.length>=3) break; if(picks.some(p=>kind(p)===kind(o))) continue; picks.push(o); }
+  for(const o of all){ if(picks.length>=3) break; if(!picks.includes(o)) picks.push(o); }
+  if(openOpt==="" || openOpt==null) {} 
+  html += `<div class="sec"><h2>Sugestão otimizada</h2><p class="lead">Um roteiro novo montado do zero: o app testou ${all.length} combinações que cabem nos 10 dias e respeitam as regras do plano, e pontuou cada uma pelas notas de vocês, preço, horas de estrada e cansaço.</p>
+    <div class="seg" role="group" aria-label="Prioridade">${Object.entries(PRIOS).map(([k,o])=>`<button aria-pressed="${optPrio===k}" data-oprio="${k}">${o.label}</button>`).join("")}</div></div>`;
+  picks.forEach((o,i)=>{
+    const isOpen = openOpt===o.key || (openOpt==="S" && i===0);
+    html+=`<div class="sec"><article class="opt ${i===0?"best":""}">
+      <div class="opt-h"><span class="eyebrow">${i===0?"Sugestão otimizada · "+PRIOS[optPrio].label:"Alternativa "+i}</span><h3>${esc(o.R.name)}</h3>
+        <div class="meter"><b>${Math.round(o.pct)}%</b><div class="bar"><i style="width:${o.pct}%"></i></div><span>do que vocês querem</span></div>
+        <div class="grid4"><div class="mini"><span>Total do casal</span><b>${brlK(o.total)}</b></div><div class="mini"><span>Cidades</span><b>${o.R.cities}</b></div><div class="mini"><span>Deslocamentos</span><b>${esc(o.R.moves)}</b></div><div class="mini"><span>Em trânsito</span><b>${esc(o.R.ground)}</b></div></div>
+        ${i===0?`<ul class="list-in">${reasonsFor(o,all).map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
+        <button class="btn small" data-toggle="${o.key}" style="justify-self:start">${isOpen?"Recolher":"Ver dia a dia, custos e o que fica de fora"}</button>
+      </div>
+      ${isOpen?optBody(o):""}
+    </article></div>`;
+  });
+  html += `<div class="sec"><h2>Os 3 roteiros do plano</h2><p class="lead">Os roteiros A, B e C do documento, ajustados pelas notas.</p></div>`;
   opts.forEach((o,i)=>{
     const tags=[i===0?"Melhor match":"", o.key===cheapest?"Mais barato":"", o.key==="C"?"Menos ônibus":"", o.key==="A"?"Único com litoral":"", o.key==="B"?"Único com Laguna 69":""].filter(Boolean).join(" · ");
     const isOpen = openOpt===o.key;
@@ -1446,6 +1619,7 @@ function renderRoutes(){
   html += `<p class="note">Base de custo: totais do plano (voo Brasília–Lima, hospedagem, comida, passeios, trens, voos internos, seguro), já com 6% de inflação e 10% de reserva. Os ajustes também levam inflação e reserva. Os valores são estimativas, não cotações.</p>`;
   v.innerHTML=html; bindCommon(v);
   v.querySelectorAll("[data-tier]").forEach(b=>b.onclick=()=>{ tier=b.dataset.tier; LS.set("tier",tier); ADJ.tier=tier; saveAdj(); });
+  v.querySelectorAll("[data-oprio]").forEach(b=>b.onclick=()=>{ optPrio=b.dataset.oprio; LS.set("optPrio",optPrio); openOpt="S"; renderRoutes(); });
   v.querySelectorAll("[data-toggle]").forEach(b=>b.onclick=()=>{ openOpt = openOpt===b.dataset.toggle?"":b.dataset.toggle; renderRoutes(); });
   const ca=$("#clearAdj",v); if(ca) ca.onclick=()=>{ ADJ.pin=[]; ADJ.cut=[]; saveAdj(); };
 }
@@ -1459,10 +1633,10 @@ function optBody(o){
   return `<div class="opt-b">
     <div><h4 style="margin:0 0 8px">Dia a dia</h4><div class="days">${days}</div></div>
     ${o.extrasPeru.length?`<div class="note">Para provar no caminho: ${o.extrasPeru.map(i=>esc(i.name)).join(", ")}.</div>`:""}
-    <div><h4 style="margin:0 0 6px">Custos estimados (casal)</h4><table class="costs"><tr><td>Base do roteiro ${o.key}, faixa ${TIERS[tier]}</td><td>${brl(o.base)}</td></tr>${adds}<tr class="tot"><td>Total</td><td>${brl(o.total)}</td></tr></table></div>
+    <div><h4 style="margin:0 0 6px">Custos estimados (casal)</h4><table class="costs"><tr><td>${o.baseLabel?esc(o.baseLabel)+", faixa "+TIERS[tier]:`Base do roteiro ${o.key}, faixa ${TIERS[tier]}`}</td><td>${brl(o.base)}</td></tr>${adds}<tr class="tot"><td>Total</td><td>${brl(o.total)}</td></tr></table></div>
     <div class="grid4"><div class="mini"><span>Tempo em trânsito</span><b>${esc(o.R.ground)}</b></div><div class="mini"><span>Risco</span><b>${esc(o.R.risk)}</b></div></div>
     ${loveIn.length?`<div><h4 style="margin:0 0 4px">Inclui o que os dois amam</h4><ul class="list-in">${loveIn.map(i=>`<li>${esc(i.name)}</li>`).join("")}</ul></div>`:""}
-    <div><h4 style="margin:0 0 4px">Fica de fora</h4><p class="note" style="margin:0 0 4px">Pelo plano: ${esc(o.R.outTxt)}.</p>${o.missed.length?`<ul class="list-out">${o.missed.slice(0,12).map(i=>`<li>${esc(i.name)} <span class="note">(nota ${combined(i.id)?.toFixed(1)??"–"}${i.routes==="f"?", não cabe em 10 dias":""})</span></li>`).join("")}</ul>`:`<p class="note">Nada que vocês querem ficou de fora.</p>`}</div>
+    <div><h4 style="margin:0 0 4px">Fica de fora</h4>${o.R.outTxt?`<p class="note" style="margin:0 0 4px">Pelo plano: ${esc(o.R.outTxt)}.</p>`:""}${o.missed.length?`<ul class="list-out">${o.missed.slice(0,12).map(i=>`<li>${esc(i.name)} <span class="note">(nota ${combined(i.id)?.toFixed(1)??"–"}${i.routes==="f"?", não cabe em 10 dias":""})</span></li>`).join("")}</ul>`:`<p class="note">Nada que vocês querem ficou de fora.</p>`}</div>
     ${o.lowIn.length?`<div class="warnbox">Está no roteiro, mas os dois deram nota baixa: ${o.lowIn.map(i=>esc(i.name)).join(", ")}. Dá para trocar por tempo livre.</div>`:""}
     ${o.notes.map(n=>`<div class="note">${esc(n)}</div>`).join("")}
   </div>`;
@@ -1530,6 +1704,7 @@ function contextForClaude(){
   for(const it of ITEMS){ const a=sc("p1",it.id), b=sc("p2",it.id); if(a==null&&b==null) continue; lines.push(`${it.id} | ${it.name} | ${REGIONS[it.region]} | R$${it.price} | ${NAMES.p1}:${a??"-"} ${NAMES.p2}:${b??"-"}${isPinned(it.id)?" | FIXADO":""}${isCut(it.id)?" | TIRADO":""}`); }
   const du=DUELS.map(d=>{const a=duelVal("p1",d.id),b=duelVal("p2",d.id); if(a==null&&b==null) return null; return `${d.q} [${sideInfo(d.a).label} × ${sideInfo(d.b).label}] ${NAMES.p1}:${a??"-"} ${NAMES.p2}:${b??"-"} (−5 = esquerda, +5 = direita)`}).filter(Boolean);
   const opts=allOptions().map(o=>`Roteiro ${o.key} (${o.R.name}): match ${Math.round(o.pct)}%, total ~${brl(o.total)} na faixa ${TIERS[tier]}. Dias: ${o.days.map(d=>`${d.d}: ${d.t} (dorme ${d.s})${d.extras?.length?" + "+d.extras.map(e=>e.name).join(", "):""}`).join(" / ")}. Ajustes de custo: ${o.adds.map(a=>a[0]+" "+brl(a[1]*INFL)).join("; ")||"nenhum"}. Fica de fora com nota alta: ${o.missed.slice(0,8).map(i=>i.name).join(", ")||"nada"}.`);
+  const best=optimize()[0]; if(best) opts.unshift(`SUGESTÃO OTIMIZADA pelo app (prioridade ${PRIOS[optPrio].label}): ${best.R.name}, match ${Math.round(best.pct)}%, total ~${brl(best.total)}, ${best.R.ground}. Dias: ${best.days.map(d=>`${d.d}: ${d.t} (dorme ${d.s})`).join(" / ")}.`);
   return `${DOC_DIGEST}\n\nCASAL: ${NAMES.p1} e ${NAMES.p2}.\n\nNOTAS (0 a 10) — id | nome | região | preço casal | notas:\n${lines.join("\n")||"(ninguém votou ainda)"}\n\nDUELOS:\n${du.join("\n")||"(nenhum)"}\n\nROTEIROS CALCULADOS PELO APP:\n${opts.join("\n")}\n\nIDs válidos para ajustes: ${ITEMS.map(i=>i.id).join(", ")}`;
 }
 async function askClaude(){
