@@ -244,6 +244,10 @@ details.more summary::-webkit-details-marker{display:none}
 .onb .pick .dot{width:44px;height:44px;font-size:18px}
 .onb input{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);width:100%}
 .names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.clearbox{border-top:1px solid var(--line);padding-top:12px;display:grid;gap:8px}
+.clearbox h3{font-size:16px}
+.clearbox .act{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
 .names label{font-size:12px;color:var(--muted);display:grid;gap:4px}
 </style>
 
@@ -1529,8 +1533,18 @@ function openOnboarding(){
     <p class="note" style="margin:0">Cada um vota no próprio celular. O app junta as respostas dos dois e monta os roteiros.</p>
     <div class="names"><label>Pessoa 1<input id="n1" value="${esc(NAMES.p1)}" maxlength="20"></label><label>Pessoa 2<input id="n2" value="${esc(NAMES.p2)}" maxlength="20"></label></div>
     <div class="pick"><button data-me="p1"><span class="dot p1">${esc(NAMES.p1[0])}</span>Sou ${esc(NAMES.p1)}</button><button data-me="p2"><span class="dot p2">${esc(NAMES.p2[0])}</span>Sou ${esc(NAMES.p2)}</button></div>
-    ${ME?`<button class="btn" data-x>Cancelar</button>`:""}</div>`;
+    ${ME?`<div class="clearbox"><h3>Minhas respostas (${esc(NAMES[ME])})</h3>
+      <p class="note" style="margin:0">Apaga só as suas respostas. As de ${esc(NAMES[other(ME)])} continuam como estão.</p>
+      <div class="act" data-clear-step><button class="btn small" data-clear="scores">Limpar minhas notas (${Object.keys(VOTES[ME].scores).length})</button><button class="btn small" data-clear="duels">Limpar meus duelos (${Object.keys(VOTES[ME].duels).length})</button><button class="btn small" data-clear="all">Limpar tudo</button></div></div>
+      <button class="btn" data-x>Fechar</button>`:""}</div>`;
   document.body.append(s);
+  const LBL={scores:"todas as suas notas",duels:"todos os seus duelos",all:"todas as suas notas e duelos"};
+  s.querySelectorAll("[data-clear]").forEach(b=>b.onclick=()=>{
+    const k=b.dataset.clear, box=s.querySelector("[data-clear-step]");
+    box.innerHTML=`<span class="warnbox">Apagar ${LBL[k]}? Não dá para desfazer.</span><button class="btn small" data-cancel>Cancelar</button><button class="btn small danger" data-confirm>Apagar</button>`;
+    box.querySelector("[data-cancel]").onclick=()=>{ s.remove(); openOnboarding(); };
+    box.querySelector("[data-confirm]").onclick=()=>{ clearMine(k); s.remove(); };
+  });
   s.querySelectorAll("[data-me]").forEach(b=>b.onclick=async()=>{
     const n1=$("#n1",s).value.trim()||"Dudu", n2=$("#n2",s).value.trim()||"Cami"; NAMES={p1:n1,p2:n2};
     ME=b.dataset.me; LS.set("me",ME); s.remove(); $("#v-chat").innerHTML="";
@@ -1538,6 +1552,14 @@ function openOnboarding(){
     await saveMeta({names:NAMES,uids}); render();
   });
   s.querySelector("[data-x]")?.addEventListener("click",()=>s.remove());
+}
+
+function clearMine(kind){
+  if(!ME) return;
+  if(db && !LOADED[ME]){ toast("Espere os votos carregarem e tente de novo."); return; }
+  if(kind!=="duels"){ VOTES[ME].scores={}; lastRated=[]; skipSet.clear(); }
+  if(kind!=="scores"){ VOTES[ME].duels={}; duelIdx=null; }
+  saveMine(); render(); toast("Suas respostas foram apagadas.");
 }
 
 /* ---------- nav ---------- */
