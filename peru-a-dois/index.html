@@ -77,7 +77,19 @@ nav.tabs button{position:relative}
 .card.fly{transition:transform .35s ease,opacity .35s ease}
 .cover{position:relative;aspect-ratio:4/3;max-width:100%;background:var(--surface-2);overflow:hidden}
 .cover svg,.cover img{width:100%;height:100%;display:block;object-fit:cover}
-.cover .shade{position:absolute;inset:auto 0 0;padding:40px 16px 14px;background:linear-gradient(transparent,rgba(10,8,24,.78));color:#fff}
+.gal{display:flex;height:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.gal::-webkit-scrollbar{display:none}
+.gal>*{flex:0 0 100%;height:100%;scroll-snap-align:center;scroll-snap-stop:always}
+.cover .shade,.cover .tag,.cover .route,.cover .illo{pointer-events:none}
+.galbtn{position:absolute;top:42%;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.88);color:#1D1838;display:grid;place-items:center;font:700 18px/1 var(--f-body);z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.galbtn.prev{left:10px}.galbtn.next{right:10px}
+.galbtn:disabled{opacity:0;pointer-events:none}
+.galcount{position:absolute;top:44px;right:12px;background:rgba(16,12,36,.72);color:#fff;font:700 11.5px var(--f-body);padding:3px 8px;border-radius:999px;font-variant-numeric:tabular-nums;pointer-events:none}
+.dots{position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:center;gap:5px;pointer-events:none;z-index:2}
+.dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5)}
+.dots i.on{background:#fff}
+.credit{position:absolute;right:10px;bottom:16px;z-index:2;font-size:10.5px;color:rgba(255,255,255,.85);text-decoration:none;background:rgba(16,12,36,.5);padding:2px 7px;border-radius:6px;max-width:45%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cover .shade{position:absolute;inset:auto 0 0;padding:40px 16px 22px;background:linear-gradient(transparent,rgba(10,8,24,.78));color:#fff}
 .cover .shade h2{font-size:26px;font-weight:800;letter-spacing:-.02em}
 .cover .shade .place{font-size:13px;opacity:.9;margin-top:2px}
 .cover .tag{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.92);color:#1D1838;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 9px;border-radius:999px}
@@ -161,7 +173,7 @@ details.more summary::-webkit-details-marker{display:none}
 .vs{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative}
 .side{border:2px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface);text-align:left;padding:0;display:flex;flex-direction:column;min-width:0}
 .side .cv{aspect-ratio:1/1;max-width:100%}
-.side .cv svg{width:100%;height:100%;display:block}
+.side .cv svg,.side .cv img{width:100%;height:100%;display:block;object-fit:cover}
 .side .tx{padding:8px 10px 10px;display:grid;gap:2px}
 .side .tx b{font-size:14px;line-height:1.25}
 .side .tx span{font-size:12px;color:var(--muted)}
@@ -957,14 +969,38 @@ function scene(type,seed){
   return `<svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${s}</svg>`;
 }
 const coverCache = {};
-function cover(it){ if(PHOTOS[it.id]) return `<img src="${esc(PHOTOS[it.id])}" alt="">`; return coverCache[it.id] ||= scene(it.scene,it.id); }
+/* Real photos from Wikimedia Commons, downloaded and served next to the page (img/…). */
+const GALLERY = /*GALLERY*/{};
+function photosOf(id){ const own = PHOTOS[id]?[{src:PHOTOS[id],own:true}]:[]; return own.concat((GALLERY[id]||[]).map(([f,file])=>({src:"img/"+f,file}))); }
+function cover(it){ const ph=photosOf(it.id)[0]; if(ph) return `<img src="${esc(ph.src)}" alt="" loading="lazy">`; return coverCache[it.id] ||= scene(it.scene,it.id); }
+function galleryHTML(it){
+  const ph=photosOf(it.id);
+  if(!ph.length) return `<div class="gal">${coverCache[it.id] ||= scene(it.scene,it.id)}</div><span class="illo">ilustração</span>`;
+  const credit = p=>p.own?`<span class="credit">foto de vocês</span>`:`<a class="credit" href="https://commons.wikimedia.org/wiki/${encodeURIComponent(p.file)}" target="_blank" rel="noopener">Wikimedia Commons ↗</a>`;
+  return `<div class="gal" data-gal>${ph.map((p,i)=>`<img src="${esc(p.src)}" alt="${esc(it.name)}, foto ${i+1}" ${i?'loading="lazy"':""} draggable="false">`).join("")}</div>
+    ${ph.length>1?`<button class="galbtn prev" data-gp="-1" aria-label="Foto anterior" disabled>‹</button><button class="galbtn next" data-gp="1" aria-label="Próxima foto">›</button><span class="galcount">1/${ph.length}</span><div class="dots">${ph.map((_,i)=>`<i class="${i?"":"on"}"></i>`).join("")}</div>`:""}
+    <span data-credits hidden>${esc(JSON.stringify(ph.map(p=>p.own?"":p.file)))}</span>${credit(ph[0])}`;
+}
+function bindGalleries(root){
+  root.querySelectorAll("[data-gal]").forEach(g=>{
+    const cv=g.parentElement; const n=g.children.length; if(n<2) return;
+    const files=JSON.parse(cv.querySelector("[data-credits]").textContent);
+    const upd=()=>{ const i=Math.round(g.scrollLeft/g.clientWidth);
+      cv.querySelector(".galcount").textContent=`${i+1}/${n}`;
+      cv.querySelectorAll(".dots i").forEach((d,k)=>d.classList.toggle("on",k===i));
+      cv.querySelector(".prev").disabled=i===0; cv.querySelector(".next").disabled=i===n-1;
+      const cr=cv.querySelector(".credit"); if(files[i]){ cr.outerHTML=`<a class="credit" href="https://commons.wikimedia.org/wiki/${encodeURIComponent(files[i])}" target="_blank" rel="noopener">Wikimedia Commons ↗</a>`; } else cr.outerHTML=`<span class="credit">foto de vocês</span>`; };
+    g.addEventListener("scroll",()=>{ clearTimeout(g._t); g._t=setTimeout(upd,60); },{passive:true});
+    cv.querySelectorAll("[data-gp]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); g.scrollBy({left:+b.dataset.gp*g.clientWidth,behavior:"smooth"}); });
+  });
+}
 
 /* ============================================================
    STATE & STORAGE
    ============================================================ */
 const LS = {get(k,d){try{const v=localStorage.getItem("peru2."+k);return v==null?d:JSON.parse(v)}catch{return d}}, set(k,v){try{localStorage.setItem("peru2."+k,JSON.stringify(v))}catch{}}};
 let ME = LS.get("me",null);
-let NAMES = {p1:"Dudu", p2:"Amor"};
+let NAMES = {p1:"Dudu", p2:"Cami"};
 let VOTES = {p1:{scores:{},duels:{}}, p2:{scores:{},duels:{}}};
 let ADJ = {pin:[], cut:[], tier:null};
 let CHAT = [];
@@ -1172,7 +1208,7 @@ function renderCards(){
     v.innerHTML=html; bindCommon(v); return;
   }
   html += `<div class="stack">${next?`<div class="card behind" aria-hidden="true"><div class="cover">${cover(next)}</div></div>`:""}${cardHTML(it,true)}</div>`;
-  html += `<div class="actions" style="margin-top:12px"><button class="btn small" id="undo" ${lastRated.length?"":"disabled"}>Desfazer</button><span class="note" style="align-self:center">Arraste: direita = quero (9), esquerda = pode cortar (2)</span><button class="btn small" id="skip">Pular</button></div>`;
+  html += `<div class="actions" style="margin-top:12px"><button class="btn small" id="undo" ${lastRated.length?"":"disabled"}>Desfazer</button><span class="note" style="align-self:center">Deslize as fotos para o lado. Arraste o card pelo texto: direita = quero (9), esquerda = corta (2)</span><button class="btn small" id="skip">Pular</button></div>`;
   v.innerHTML=html; bindCommon(v);
   const card=$(".card:not(.behind)",v); bindSwipe(card,it);
   $("#skip",v).onclick=()=>{ skipSet.delete(it.id); skipSet.add(it.id); renderCards(); };
@@ -1184,8 +1220,7 @@ function cardHTML(it,interactive){
   const price = it.price ? (it.price>=1000?brlK(it.price):brl(it.price)) : "grátis";
   const q = encodeURIComponent(it.name+" "+(it.region==="peru"?"Peru":REGIONS[it.region]||"")+" Peru");
   return `<article class="card" data-id="${it.id}">
-    <div class="cover">${cover(it)}<span class="tag">${CATS[it.cat].label}</span><div class="route">${routes}</div>
-      ${PHOTOS[it.id]?"":`<span class="illo">ilustração</span>`}
+    <div class="cover">${galleryHTML(it)}<span class="tag">${CATS[it.cat].label}</span><div class="route">${routes}</div>
       <div class="shade"><h2>${esc(it.name)}</h2><div class="place">${esc(it.place)}</div></div>
       <div class="stamp yes">QUERO!</div><div class="stamp no">CORTA</div></div>
     <div class="body">
@@ -1202,7 +1237,7 @@ function cardHTML(it,interactive){
         <h4>Destaques</h4><ul>${it.hi.map(h=>`<li>${esc(h)}</li>`).join("")}</ul>
         <h4>Dicas</h4><ul>${it.tips.map(h=>`<li>${esc(h)}</li>`).join("")}</ul>
         <div class="links">
-          <a href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener">Ver fotos reais</a>
+          <a href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener">Mais fotos no Google</a>
           <a href="https://www.google.com/maps/search/${q}" target="_blank" rel="noopener">Mapa e avaliações</a>
           <a href="https://www.tripadvisor.com.br/Search?q=${q}" target="_blank" rel="noopener">TripAdvisor</a>
           ${assets?`<button class="btn-ghost" data-photo="${it.id}">${PHOTOS[it.id]?"Trocar foto":"Adicionar foto"}</button>`:""}
@@ -1217,6 +1252,7 @@ function cardHTML(it,interactive){
     </div></article>`;
 }
 function bindCommon(root){
+  bindGalleries(root);
   root.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>{catFilter=b.dataset.cat;renderCards()});
   root.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
   root.querySelectorAll("[data-score]").forEach(b=>b.onclick=e=>{e.stopPropagation(); const card=b.closest(".card"); rate(card.dataset.id,+b.dataset.score,card,0)});
@@ -1243,7 +1279,7 @@ function matchPop(id){
 function bindSwipe(card,it){
   let sx=0,sy=0,dx=0,drag=false,id=null;
   const yes=$(".stamp.yes",card), no=$(".stamp.no",card);
-  card.addEventListener("pointerdown",e=>{ if(e.target.closest("button,a,summary,details[open] *")) return; drag=true; id=e.pointerId; sx=e.clientX; sy=e.clientY; dx=0; card.style.transition="none"; });
+  card.addEventListener("pointerdown",e=>{ if(e.target.closest("button,a,summary,details[open] *,.gal")) return; drag=true; id=e.pointerId; sx=e.clientX; sy=e.clientY; dx=0; card.style.transition="none"; });
   card.addEventListener("pointermove",e=>{ if(!drag||e.pointerId!==id) return; dx=e.clientX-sx; const dy=e.clientY-sy; if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dx)<10) return; if(Math.abs(dx)>8) card.setPointerCapture?.(id);
     card.style.transform=`translateX(${dx}px) rotate(${dx/20}deg)`; yes.style.opacity=Math.max(0,Math.min(1,dx/100)); no.style.opacity=Math.max(0,Math.min(1,-dx/100)); });
   const end=()=>{ if(!drag) return; drag=false; card.style.transition="";
@@ -1496,7 +1532,7 @@ function openOnboarding(){
     ${ME?`<button class="btn" data-x>Cancelar</button>`:""}</div>`;
   document.body.append(s);
   s.querySelectorAll("[data-me]").forEach(b=>b.onclick=async()=>{
-    const n1=$("#n1",s).value.trim()||"Dudu", n2=$("#n2",s).value.trim()||"Amor"; NAMES={p1:n1,p2:n2};
+    const n1=$("#n1",s).value.trim()||"Dudu", n2=$("#n2",s).value.trim()||"Cami"; NAMES={p1:n1,p2:n2};
     ME=b.dataset.me; LS.set("me",ME); s.remove(); $("#v-chat").innerHTML="";
     const uids={...(META.uids||{})}; if(myUid) uids[ME]=myUid;
     await saveMeta({names:NAMES,uids}); render();
