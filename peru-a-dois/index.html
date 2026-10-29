@@ -56,7 +56,7 @@ main{padding-block:14px 110px}
 
 /* tab bar */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
-nav.tabs .wrap{display:grid;grid-template-columns:repeat(5,1fr)}
+nav.tabs .wrap{display:grid;grid-template-columns:repeat(6,1fr)}
 nav.tabs button{border:0;background:none;padding:9px 2px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:600;color:var(--muted)}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-current="page"]{color:var(--accent)}
@@ -246,6 +246,58 @@ details.more summary::-webkit-details-marker{display:none}
 .onb .pick .dot{width:44px;height:44px;font-size:18px}
 .onb input{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--surface);width:100%}
 .names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* plan tab */
+.kpis4{grid-template-columns:repeat(4,1fr)}
+.kpis4 .kpi b{font-size:19px}
+@media (max-width:420px){.kpis4{grid-template-columns:repeat(2,1fr)}}
+.choices{display:grid;gap:10px}
+.choice{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.optbtn{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:7px 10px;font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left}
+.optbtn small{font-size:11px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.optbtn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.altchart{width:100%;height:auto;display:block}
+.stops{display:flex;flex-wrap:wrap;gap:4px 8px;font-size:13px;margin-top:8px}
+.checks{list-style:none;padding:0;margin:0;display:grid;gap:4px;font-size:14px}
+.checks li.ok{color:var(--good)} .checks li.no{color:var(--warn)}
+.planner{display:grid;gap:12px}
+.pdays{display:grid;gap:10px}
+.pday{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;display:grid;gap:6px;transition:background .15s}
+.pday.warn{border-color:var(--warn)}
+.pday.over,.pbank.over{background:var(--accent-soft);border-color:var(--accent)}
+.pday-h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px}
+.pday-h span{color:var(--muted)}
+.pday-t{font-size:12.5px;color:var(--muted)}
+.plist{display:grid;gap:6px;min-height:38px}
+.pempty{border:2px dashed var(--line);border-radius:10px;padding:8px;text-align:center;font-size:12.5px;color:var(--muted)}
+.pchip{display:grid;grid-template-columns:22px 36px 1fr auto;gap:8px;align-items:center;background:var(--surface-2);border-radius:10px;padding:5px 8px 5px 4px;cursor:pointer;user-select:none}
+.pchip.fixed{background:var(--lake-soft)}
+.pchip.dragging{opacity:.35}
+.pchip .grip{touch-action:none;cursor:grab;font-size:18px;color:var(--muted);text-align:center;line-height:36px}
+.pchip .pth{width:36px;height:36px;border-radius:7px;overflow:hidden}
+.pchip .pth svg,.pchip .pth img{width:100%;height:100%;object-fit:cover;display:block}
+.pchip .pnm{min-width:0;display:grid}
+.pchip .pnm b{font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pchip .pnm small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pchip i{font-style:normal;font:700 12px var(--f-display);min-width:28px;height:24px;border-radius:7px;display:grid;place-items:center;color:#fff}
+.pchip.ghost{position:fixed;left:0;top:0;z-index:60;pointer-events:none;box-shadow:var(--shadow);opacity:.95}
+.pw{font-size:12px;color:var(--warn);background:var(--warn-soft);border-radius:8px;padding:4px 8px}
+.pbank{background:var(--surface);border:1px dashed var(--muted);border-radius:14px;padding:10px;display:grid;gap:8px}
+.pbank-h{display:grid;gap:6px}
+.pbank .plist{max-height:420px;overflow:auto}
+@media (min-width:900px){.planner{grid-template-columns:1fr 320px;align-items:start}.pbank{position:sticky;top:calc(80px + env(safe-area-inset-top,0px))}}
+.movegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.movegrid .btn{display:grid;text-align:left}
+.movegrid small{font-weight:500;color:var(--muted);font-size:11px}
+.bundles{display:grid;gap:10px}
+.bundle{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px}
+.bundle-h{display:grid;gap:2px}
+.bundle-items{display:flex;flex-wrap:wrap;gap:5px}
+.bitem{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:4px 9px;font-size:12.5px;font-weight:600}
+.bitem.on{background:var(--good-soft);border-color:var(--good)}
+.bitem.low{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.bundle-a{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bundle-a select{border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:var(--surface)}
 .clearbox{border-top:1px solid var(--line);padding-top:12px;display:grid;gap:8px}
 .clearbox h3{font-size:16px}
 .clearbox .act{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -270,6 +322,7 @@ details.more summary::-webkit-details-marker{display:none}
   <section class="view" id="v-duels" hidden></section>
   <section class="view" id="v-match" hidden></section>
   <section class="view" id="v-routes" hidden></section>
+  <section class="view" id="v-plan" hidden></section>
   <section class="view" id="v-chat" hidden></section>
 </main>
 
@@ -279,6 +332,7 @@ details.more summary::-webkit-details-marker{display:none}
     <button data-tab="duels"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h11M11 3l4 4-4 4M20 17H9M13 13l-4 4 4 4"/></svg>Duelos</button>
     <button data-tab="match"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg>Match</button>
     <button data-tab="routes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 20l5-12 4 7 3-4 6 9z"/><circle cx="17" cy="5" r="2"/></svg>Roteiros</button>
+    <button data-tab="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M7 13h4M7 17h7"/></svg>Plano</button>
     <button data-tab="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>Chat</button>
   </div>
 </nav>
@@ -1050,6 +1104,10 @@ async function initCaps(){
     render(); checkMatches();
   }, e=>console.warn(e));
   db.doc("meta/adjust").onSnapshot(snap=>{ const d=snap.exists?snap.data():{}; ADJ={pin:d.pin||[],cut:d.cut||[],tier:d.tier||null}; if(ADJ.tier) tier=ADJ.tier; render(); });
+  db.doc("plan/main").onSnapshot(snap=>{ const d=snap.exists?snap.data():null; if(!d) return;
+    if((d.updatedAt||0)<=PLAN.updatedAt || (d.updatedAt||0)<planLastSave) return;
+    PLAN={choices:d.choices||{},manual:d.manual||{},removed:d.removed||[],updatedAt:d.updatedAt||0,by:d.by||null}; LS.set("plan",PLAN);
+    if(tab==="plan" && !dragState) renderPlan(); });
   db.doc("meta/photos").onSnapshot(snap=>{ const d=snap.exists?snap.data():{}; PHOTOS={}; for(const [k,v] of Object.entries(d.map||{})) PHOTOS[k]="/_blob/"+v; render(); });
   db.collection("chat").orderBy("ts").limit(300).onSnapshot(snap=>{ CHAT = snap.docs.map(x=>({id:x.id,...x.data()})); if(tab==="chat") renderChat(); updateBadge(); }, e=>console.warn(e));
 }
@@ -1117,12 +1175,13 @@ function buildOption(key){
     let best = cands.map(id=>[id,c(id)]).sort((a,b)=>b[1]-a[1])[0];
     let pick = best && best[1]>=6 ? best[0] : (key==="C"?"pisac":"cusco-pe");
     if(key==="C" && pick==="pisac"){ slot.t="Vale Sagrado: Pisac e Ollantaytambo"; slot.ids=["pisac","ollantaytambo","feira-pisac"]; slot.r="vale"; }
-    else { const it=ITEM[pick]; slot.t = pick==="cusco-pe" ? "Cusco a pé: San Blas, mercados e compras (dia leve)" : it.name; slot.ids = [pick,...slot.ids]; slot.e = it.eff; slot.chg = pick!=="humantay"; slot.r="cusco"; }
+    else { const it=ITEM[pick]; slot.t = pick==="cusco-pe" ? "Cusco a pé: San Blas, mercados e compras (dia leve)" : it.name; slot.ids = pick==="cusco-pe" ? [pick,...slot.ids] : [pick]; slot.e = it.eff; slot.chg = pick!=="humantay"; slot.r="cusco"; }
     slot.ids.forEach(id=>incl.add(id));
     const base = key==="A"?720:0; const cost = pick==="pisac"?0:ITEM[pick].price; const delta = cost-base;
     if(delta) adds.push([`Dia livre: ${pick==="pisac"?"Vale Sagrado":ITEM[pick].name}`, delta]);
   }
   if(key==="C" && slot && slot.r==="vale") regions.add("vale");
+  incl.clear(); days.forEach(d=>d.ids.forEach(id=>incl.add(id))); // the slot may have replaced some of the day's visits
   // Bus vs hotel (B)
   const bus = duelAvg("bus");
   if(key==="B" && bus!=null && bus>=2){ adds.push(["Hotel em Lima no lugar de 1 noite de ônibus",560]); notes.push("Vocês preferem hotel a ônibus noturno: somamos uma noite em Lima na volta de Huaraz."); }
@@ -1144,38 +1203,55 @@ function buildOption(key){
   }
   const parNight = days.find(d=>d.lux==="paracas");
   if(parNight && c("paracas-luxo")>=7){ parNight.s="Hotel de luxo em Paracas"; parNight.chg=true; adds.push(["Hotel de luxo em Paracas",1040]); incl.add("paracas-luxo"); }
-  // Extras by region
+  // Extras by region, limited by each day's time
   const thr = paceThreshold();
-  const extras = ITEMS.filter(it=>it.routes.includes("x") && it.cat!=="trem" && it.cat!=="hotel" && !incl.has(it.id) && (regions.has(it.region)||it.region==="peru") && (c(it.id)>=thr));
-  const extrasByRegion = {};
-  for(const it of extras){
-    if(it.cat==="prato") { extrasByRegion.peru ||= []; extrasByRegion.peru.push(it); continue; }
-    if(it.id==="via-ferrata" && incl.has("skylodge")) continue;
-    if(["huayna-picchu","montana-mp"].includes(it.id)){ const alt = it.id==="huayna-picchu"?"montana-mp":"huayna-picchu"; if(extras.some(e=>e.id===alt) && c(alt)>c(it.id)) continue; }
-    (extrasByRegion[it.region] ||= []).push(it); incl.add(it.id);
-    if(it.price) extra+=it.price;
-  }
-  for(const it of (extrasByRegion.peru||[])) incl.add(it.id);
+  for(const d of days) d.r = d.r||"lima";
   const mpDay = days.find(d=>d.ids.includes("machu-picchu"));
-  if(mpDay && extrasByRegion.mp){ mpDay.extras = extrasByRegion.mp; delete extrasByRegion.mp; }
-  for(const d of days){ if(d.r!=="peru" && extrasByRegion[d.r]){ d.extras = extrasByRegion[d.r]; delete extrasByRegion[d.r]; } }
-  if(extra) adds.push([`Encaixes escolhidos (${extras.filter(i=>i.cat!=="prato").length} itens: restaurantes, passeios, experiências)`, extra]);
+  const mx = ["huayna-picchu","montana-mp"].filter(id=>!isCut(id)&&c(id)>=thr).sort((a,b)=>c(b)-c(a))[0];
+  if(mpDay && mx){ mpDay.ids.push(mx); incl.add(mx); adds.push([ITEM[mx].name, ITEM[mx].price]); }
+  const fit = placeFitIns(days, incl, thr);
+  if(fit.extra) adds.push([`Encaixes escolhidos (${fit.placed.length} itens que cabem no tempo dos dias)`, fit.extra]);
+  extra += 0;
   // Coverage
   let want=0, got=0; const missed=[];
   for(const it of ITEMS){ if(it.cat==="prato"||it.cat==="trem") continue; const v=c(it.id); if(v<6) continue; const w=v-5; want+=w; if(incl.has(it.id)) got+=w; else missed.push(it); }
   const lowIn = [...incl].filter(id=>{ const a=sc("p1",id), b=sc("p2",id); return a!=null&&b!=null&&a<=3&&b<=3; }).map(id=>ITEM[id]);
   let pct = want? got/want*100 : 0;
-  const rb = routeDuelBonus(key); pct = Math.max(0,Math.min(100,pct + rb*3));
+  const rb = routeDuelBonus(key);
   const base = R.cost[tier];
   const addsTotal = adds.reduce((s,a)=>s+a[1],0)*INFL;
-  return {key,R,days,incl,adds,addsTotal,base,total:base+addsTotal,pct,missed:missed.sort((a,b)=>c(b.id)-c(a.id)),lowIn,notes,extrasPeru:extrasByRegion.peru||[]};
+  return {key,R,days,incl,adds,addsTotal,base,total:base+addsTotal,pct,missed:missed.sort((a,b)=>c(b.id)-c(a.id)),lowIn,notes,extrasPeru:ITEMS.filter(it=>it.cat==="prato"&&incl.has(it.id))};
 }
 function routeDuelBonus(k){
   let s=0; const pairs={rAB:["A","B"],rBC:["B","C"],rAC:["A","C"]};
   for(const [id,[a,b]] of Object.entries(pairs)){ const v=duelAvg(id); if(v==null) continue; if(k===a) s+=-v; if(k===b) s+=v; }
   return s/2;
 }
-function allOptions(){ return ["A","B","C"].map(buildOption).sort((x,y)=>y.pct-x.pct); }
+
+/* Fit-ins (restaurants, short visits, shops) go into the days of their region only while there is time:
+   ~11h per day including that day's travel, at most 2 special meals a day. Shared by plan routes and optimizer. */
+const DAY_CAP=11;
+function estTransit(d){ if(d.h!=null) return d.h; const t=d.t||""; if(/Chegada em Lima/.test(t)) return 5; if(/noturno/i.test(t)) return 2; if(/Ônibus|ônibus/.test(t)) return 4.5; if(/Voo|voo/.test(t)) return 4; if(/[Tt]rem/.test(t)) return 2.5; return 0; }
+function fitInCandidate(it,incl,regions,thr){
+  if(incl.has(it.id)||["trem","hotel","prato"].includes(it.cat)) return false;
+  if(!(it.routes.includes("x")||LIMA_POOL.includes(it.id)||CITY_LIGHT.includes(it.id))) return false;
+  if(FREE_POOL.includes(it.id)||it.id==="via-ferrata"||["huayna-picchu","montana-mp"].includes(it.id)) return false;
+  return (regions.has(it.region)) && c(it.id)>=thr;
+}
+function placeFitIns(days,incl,thr){
+  const regions=new Set(days.map(d=>d.r));
+  const used=days.map(d=> d.s==="em voo" ? DAY_CAP : d.ids.reduce((s,id)=>s+(ITEM[id]?hrsOf(id):0),0) + (d.ids.some(id=>FREE_POOL.includes(id)&&hrsOf(id)>=8)?0:estTransit(d)));
+  const meals=days.map(()=>0); days.forEach(d=>d.extras=[]);
+  const cands=ITEMS.filter(it=>fitInCandidate(it,incl,regions,thr)).sort((a,b)=>c(b.id)-c(a.id));
+  let extra=0; const placed=[];
+  for(const it of cands){ const h=it.cat==="restaurante"?1.5:hrsOf(it.id); let best=-1;
+    days.forEach((d,i)=>{ if(d.s==="em voo"||!fitsDay(it.id,d)) return; if(it.cat==="restaurante"&&meals[i]>=2) return;
+      const cap=it.cat==="restaurante"?DAY_CAP+1.5:DAY_CAP; if(used[i]+h>cap) return; if(best<0||used[i]<used[best]) best=i; });
+    if(best<0) continue; used[best]+=h; if(it.cat==="restaurante") meals[best]++; days[best].extras.push(it); incl.add(it.id); placed.push(it); extra+=it.price; }
+  for(const it of ITEMS) if(it.cat==="prato" && c(it.id)>=thr) incl.add(it.id); // dishes fit anywhere
+  return {placed,extra};
+}
+function allOptions(){ return ["A","B","C"].map(buildOption).sort((x,y)=>(y.pct+routeDuelBonus(y.key)*3)-(x.pct+routeDuelBonus(x.key)*3)); }
 /* ============================================================
    OPTIMIZER — builds new itineraries from day blocks, under the plan's rules:
    1st night in Lima, sea level → Vale (2.900 m) → Cusco (3.400 m) → high treks,
@@ -1202,7 +1278,7 @@ function planDays(spec){
   // spec: {lima, costa(0|2|3), huaraz(0|2|3 days in Huaraz), core:"train"|"ij", vale(0|1), free}
   const used=new Set(); const D=[]; const take=ids=>{ ids.forEach(i=>used.add(i)); return ids; };
   const day=(o)=>{ D.push({e:0,h:0,move:null,ids:[],...o}); return D[D.length-1]; };
-  day({t:"Chegada em Lima (voo direto de Brasília), Huaca Pucllana e Miraflores",s:"Lima",ids:take(["huaca-pucllana","miraflores"]),r:"lima",cost:[560,1040],h:0,move:"voo internacional"});
+  day({t:"Chegada em Lima (voo direto de Brasília), Huaca Pucllana e Miraflores",s:"Lima",ids:take(["huaca-pucllana","miraflores"]),r:"lima",cost:[560,1040],h:5,move:"voo internacional"});
   if(spec.costa){
     day({t:"Ônibus Lima–Paracas (~4h) e Reserva de Paracas",s:"Paracas",ids:take(["paracas"]),r:"costa",cost:[614,1150],h:4,move:"ônibus",lux:"paracas"});
     const ex = val("jubartes")>=0?["jubartes"]:[];
@@ -1223,15 +1299,16 @@ function planDays(spec){
     day({t:"Laguna 69 (4.600 m, dia inteiro), à noite ônibus-leito de volta a Lima",s:"no ônibus",e:2,ids:take(["laguna-69"]),r:"huaraz",cost:[870,1510],h:2+8*0.5,move:"ônibus noturno"});
   }
   day({t:spec.huaraz?"Chegada em Lima de manhã, voo Lima–Cusco à tarde, descanso":"Voo Lima–Cusco, descanso para a altitude e Plaza de Armas",s:"Cusco",ids:take(["cusco-centro"]),r:"cusco",cost:[1040,1560],h:4,move:"voo"});
-  const freeIds=[]; for(let i=0;i<spec.free;i++){ const p=topFrom(FREE_POOL.filter(x=>x!=="cusco-pe"),1,new Set([...used,...freeIds]))[0]; freeIds.push(p||"cusco-pe"); }
+  const freeIds=[]; for(let i=0;i<spec.free;i++){ const forced=spec.freePick?.[i]; if(forced && forced!=="auto"){ freeIds.push(forced); continue; }
+    const p=topFrom(FREE_POOL.filter(x=>x!=="cusco-pe"),1,new Set([...used,...freeIds]))[0]; freeIds.push(p||"cusco-pe"); }
   let restN=0;
   const freeDay=(id)=>{ const it=ITEM[id]; const rest=id==="cusco-pe"||!id; if(rest) restN++;
     return day({t:rest?(restN>1?"Dia livre em Cusco: dormir até tarde, cafés, Qorikancha e compras":"Cusco a pé: San Blas, Sacsayhuamán, mercado San Pedro e compras (dia leve)"):it.name+(it.eff===2?" (dia inteiro, saída de madrugada)":""),s:"Cusco",e:rest?0:it.eff,ids:take(rest?["cusco-pe","san-blas","san-pedro","sacsayhuaman"].filter(x=>!used.has(x)):[id]),r:"cusco",cost:[650+(rest?0:it.price),1170+(rest?0:it.price)],h:rest?0:5,move:null,free:true}); };
   if(spec.core==="train"){
     if(spec.vale){ const ids=take(topFrom(VALE_POOL,2,used,0)); day({t:"Vale Sagrado: "+(ids.length?ids.map(x=>ITEM[x].name).join(" e "):"Chinchero e Maras"),s:"Vale Sagrado",e:ids.some(x=>ITEM[x].eff===2)?2:1,ids,r:"vale",cost:[700+ids.reduce((s,x)=>s+ITEM[x].price,0),1300+ids.reduce((s,x)=>s+ITEM[x].price,0)],h:2}); }
-    day({t:"Vale Sagrado: Pisac, Moray e Ollantaytambo",s:"Ollantaytambo",e:1,ids:take(["pisac","moray","ollantaytambo"].concat(val("feira-pisac")>0?["feira-pisac"]:[])),r:"vale",cost:[910,1820],h:2,lux:"vale"});
+    day({t:"Vale Sagrado: Pisac, Moray e Ollantaytambo",s:"Ollantaytambo",e:1,ids:take(["pisac","moray","ollantaytambo"].concat(val("feira-pisac")>0&&!used.has("feira-pisac")?["feira-pisac"]:[])),r:"vale",cost:[910,1820],h:2,lux:"vale"});
     day({t:"Trem para Aguas Calientes, termas e vila",s:"Aguas Calientes",ids:take(["aguas-termas"]),r:"mp",cost:[1380,2320],h:1.7,move:"trem",train:true});
-    const mx = topFrom(["huayna-picchu","montana-mp"],1,used,1);
+    const mx = spec.mp&&spec.mp!=="auto" ? (spec.mp==="none"?[]:[spec.mp]) : topFrom(["huayna-picchu","montana-mp"],1,used,1);
     day({t:"Machu Picchu com guia"+(mx.length?" + "+ITEM[mx[0]].name:"")+", trem e van de volta a Cusco",s:"Cusco",e:2,ids:take(["machu-picchu",...mx]),r:"mp",cost:[2095+(mx.length?ITEM[mx[0]].price:0),3605+(mx.length?ITEM[mx[0]].price:0)],h:3.5,move:"trem"});
     freeIds.forEach(freeDay);
   } else {
@@ -1244,14 +1321,14 @@ function planDays(spec){
     day({t:"Inca Jungle 1: bike descendo desde ~4.300 m",s:"Santa María",e:2,ids:take(["inca-jungle"]),r:"mp",cost:[1670,2300],h:3,move:"van"});
     day({t:"Inca Jungle 2: trilha, tirolesa e termas de Cocalmayo",s:"Santa Teresa",e:2,ids:take(["tirolesa","cocalmayo"]),r:"mp",cost:[1670,2300],h:1});
     day({t:"Inca Jungle 3: caminhada até Aguas Calientes",s:"Aguas Calientes",e:1,ids:[],r:"mp",cost:[1670,2300],h:1});
-    const mx = topFrom(["huayna-picchu","montana-mp"],1,used,1);
+    const mx = spec.mp&&spec.mp!=="auto" ? (spec.mp==="none"?[]:[spec.mp]) : topFrom(["huayna-picchu","montana-mp"],1,used,1);
     day({t:"Machu Picchu com guia"+(mx.length?" + "+ITEM[mx[0]].name:"")+", trem e van de volta a Cusco",s:"Cusco",e:2,ids:take(["machu-picchu",...mx]),r:"mp",cost:[935,1455],h:3.5,move:"trem",train:true});
     freeIds.forEach(freeDay);
   }
   day({t:"Voo Cusco–Lima de manhã, Lima–Brasília à noite",s:"em voo",ids:[],r:"lima",cost:[840,1060],h:2,move:"voo"});
   return {D,used};
 }
-function dayLabels(n){ const fri=(duelAvg("dates")||0)>0; const wd=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"]; const start=fri?5:6, d0=fri?3:4;
+function dayLabels(n){ const fri = PLAN?.choices?.dates ? PLAN.choices.dates==="sex" : (duelAvg("dates")||0)>0; const wd=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"]; const start=fri?5:6, d0=fri?3:4;
   return [...Array(n)].map((_,i)=>`${wd[(start+i)%7]} ${d0+i}/9${d0+i===7?" (feriado)":""}`); }
 
 const FIXED_COSTS={econ:5080+400+460, meio:5720+400+560, conf:7450+400+660}; // flight, insurance, local transport
@@ -1269,21 +1346,16 @@ function evalSpec(spec){
   const incl=new Set(used); const adds=[]; const notes=[];
   // luxury / train upgrades driven by votes
   const vn=D.find(d=>d.lux==="vale");
-  if(vn){ const best=VALE_LUX.filter(id=>c(id)>=7).sort((a,b)=>c(b)-c(a)||ITEM[a].price-ITEM[b].price)[0]; if(best){ vn.s=ITEM[best].name; vn.chg=true; adds.push([`Noite no ${ITEM[best].name}`,ITEM[best].price]); incl.add(best);} }
-  const pn=D.find(d=>d.lux==="paracas"); if(pn && c("paracas-luxo")>=7){ pn.s="Hotel de luxo em Paracas"; pn.chg=true; adds.push(["Hotel de luxo em Paracas",1040]); incl.add("paracas-luxo"); }
+  if(vn){ const best= spec.lux&&spec.lux!=="auto" ? (spec.lux==="none"?null:spec.lux) : VALE_LUX.filter(id=>c(id)>=7).sort((a,b)=>c(b)-c(a)||ITEM[a].price-ITEM[b].price)[0]; if(best){ vn.s=ITEM[best].name; vn.chg=true; adds.push([`Noite no ${ITEM[best].name}`,ITEM[best].price]); incl.add(best);} }
+  const pn=D.find(d=>d.lux==="paracas"); if(pn && (spec.parLux==="yes" || (!spec.parLux||spec.parLux==="auto") && c("paracas-luxo")>=7)){ pn.s="Hotel de luxo em Paracas"; pn.chg=true; adds.push(["Hotel de luxo em Paracas",1040]); incl.add("paracas-luxo"); }
   const td=D.find(d=>d.train); if(td){ const legs=spec.core==="train"?2:1, base=spec.core==="train"?1765:1070;
-    const bt=TRAINS.filter(id=>!isCut(id)).map(id=>[id,c(id)]).sort((a,b)=>b[1]-a[1])[0];
+    const forcedT = spec.train&&spec.train!=="auto"&&spec.train!=="hiram"&&spec.train!=="basic" ? [spec.train,99] : null;
+    const bt= spec.train==="basic"||spec.train==="hiram" ? null : forcedT || TRAINS.filter(id=>!isCut(id)).map(id=>[id,c(id)]).sort((a,b)=>b[1]-a[1])[0];
     if(bt&&bt[1]>=5){ adds.push([`Trem ${ITEM[bt[0]].name}`,ITEM[bt[0]].price*legs-base]); incl.add(bt[0]); td.train=ITEM[bt[0]].name; } else td.train=legs===2?"Expedition na ida, Vistadome na volta":"Vistadome (volta)";
-    if(spec.core==="train" && c("hiram")>=8){ adds.push(["Hiram Bingham na ida (luxo)",3200]); incl.add("hiram"); td.train="Hiram Bingham na ida, "+td.train; } }
-  // food & restaurant encaixes in visited regions
-  const regions=new Set(D.map(d=>d.r)); const thr=paceThreshold(); let extra=0; const byR={};
-  for(const it of ITEMS){ if(incl.has(it.id)||["trem","hotel"].includes(it.cat)) continue;
-    if(!(it.routes.includes("x")||LIMA_POOL.includes(it.id)||CITY_LIGHT.includes(it.id))) continue; // same fit-in rule as the plan routes
-    if(!(regions.has(it.region)||it.region==="peru")) continue; if(c(it.id)<thr) continue;
-    if(FREE_POOL.includes(it.id)||it.id==="via-ferrata"||["huayna-picchu","montana-mp"].includes(it.id)) continue; // these need a day of their own
-    incl.add(it.id); if(it.cat!=="prato"){ extra+=it.price; (byR[it.region]||=[]).push(it); } }
-  for(const d of D){ if(byR[d.r]&&d.s!=="em voo"){ d.extras=byR[d.r]; delete byR[d.r]; } }
-  if(extra) adds.push(["Encaixes: restaurantes, lojas e experiências que vocês querem",extra]);
+    if(spec.core==="train" && (spec.train==="hiram" || (!spec.train||spec.train==="auto") && c("hiram")>=8)){ adds.push(["Hiram Bingham na ida (luxo)",3200]); incl.add("hiram"); td.train="Hiram Bingham na ida, "+td.train; } }
+  // fit-ins limited by each day's time (same rule as the plan routes)
+  const fit=placeFitIns(D,incl,paceThreshold());
+  if(fit.extra) adds.push(["Encaixes: restaurantes, lojas e experiências que cabem nos dias",fit.extra]);
   // cost
   const base=rawBase(D)*calibration(); const addsTotal=adds.reduce((s,a)=>s+a[1],0)*INFL; const total=base+addsTotal;
   // value & penalties
@@ -1355,12 +1427,13 @@ function reasonsFor(o,alts){
    ============================================================ */
 function render(){
   renderHeader();
-  for(const t of ["cards","duels","match","routes","chat"]) $("#v-"+t).hidden = t!==tab;
+  for(const t of ["cards","duels","match","routes","plan","chat"]) $("#v-"+t).hidden = t!==tab;
   document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-current", b.dataset.tab===tab?"page":"false"));
   if(tab==="cards") renderCards();
   if(tab==="duels") renderDuels();
   if(tab==="match") renderMatch();
   if(tab==="routes") renderRoutes();
+  if(tab==="plan") renderPlan();
   if(tab==="chat") renderChat();
   updateBadge();
 }
@@ -1726,6 +1799,7 @@ function contextForClaude(){
   for(const it of ITEMS){ const a=sc("p1",it.id), b=sc("p2",it.id); if(a==null&&b==null) continue; lines.push(`${it.id} | ${it.name} | ${REGIONS[it.region]} | R$${it.price} | ${NAMES.p1}:${a??"-"} ${NAMES.p2}:${b??"-"}${isPinned(it.id)?" | FIXADO":""}${isCut(it.id)?" | TIRADO":""}`); }
   const du=DUELS.map(d=>{const a=duelVal("p1",d.id),b=duelVal("p2",d.id); if(a==null&&b==null) return null; return `${d.q} [${sideInfo(d.a).label} × ${sideInfo(d.b).label}] ${NAMES.p1}:${a??"-"} ${NAMES.p2}:${b??"-"} (−5 = esquerda, +5 = direita)`}).filter(Boolean);
   const opts=allOptions().map(o=>`Roteiro ${o.key} (${o.R.name}): match ${Math.round(o.pct)}%, total ~${brl(o.total)} na faixa ${TIERS[tier]}. Dias: ${o.days.map(d=>`${d.d}: ${d.t} (dorme ${d.s})${d.extras?.length?" + "+d.extras.map(e=>e.name).join(", "):""}`).join(" / ")}. Ajustes de custo: ${o.adds.map(a=>a[0]+" "+brl(a[1]*INFL)).join("; ")||"nenhum"}. Fica de fora com nota alta: ${o.missed.slice(0,8).map(i=>i.name).join(", ")||"nada"}.`);
+  try{ const po=planEval(planChoices()); if(po){ const pd=planSchedule(po); opts.unshift(`PLANO ATUAL MONTADO PELO CASAL NA ABA PLANO: ${po.R.name}, custo ~${brl(planCost(po,pd))}. Agenda: ${pd.map(d=>`${d.d} (dorme ${d.s}): ${d.all.map(id=>ITEM[id].name).join(", ")||d.t}`).join(" / ")}.`); } }catch(e){}
   const best=rankOptimized(optimize(),allOptions()).list[0]; if(best) opts.unshift(`SUGESTÃO OTIMIZADA pelo app (prioridade ${PRIOS[optPrio].label}): ${best.R.name}, match ${Math.round(best.pct)}%, total ~${brl(best.total)}, ${best.R.ground}. Dias: ${best.days.map(d=>`${d.d}: ${d.t} (dorme ${d.s})`).join(" / ")}.`);
   return `${DOC_DIGEST}\n\nCASAL: ${NAMES.p1} e ${NAMES.p2}.\n\nNOTAS (0 a 10) — id | nome | região | preço casal | notas:\n${lines.join("\n")||"(ninguém votou ainda)"}\n\nDUELOS:\n${du.join("\n")||"(nenhum)"}\n\nROTEIROS CALCULADOS PELO APP:\n${opts.join("\n")}\n\nIDs válidos para ajustes: ${ITEMS.map(i=>i.id).join(", ")}`;
 }
@@ -1750,6 +1824,288 @@ ${contextForClaude()}`;
     if(e?.code!=="cancelled") toast(msg);
   }
 }
+
+
+/* ============================================================
+   PLANO — shared planning board: priorities, cuts, choices that rebuild the trip,
+   drag-and-drop schedule, city order by altitude, and bundles. Stored in db plan/main.
+   Schedule model: each day's items = the blocks' fixed items (minus moved/removed) + manual drops.
+   ============================================================ */
+let PLAN = LS.get("plan",{choices:{},manual:{},removed:[],updatedAt:0,by:null});
+let planLastSave=0, planTimer=null, bankFilter="top";
+function savePlan(){
+  PLAN.updatedAt=Date.now(); PLAN.by=ME; planLastSave=PLAN.updatedAt; LS.set("plan",PLAN);
+  if(!db){ renderPlan(); return; }
+  clearTimeout(planTimer); planTimer=setTimeout(async()=>{ try{ await db.doc("plan/main").set(JSON.parse(JSON.stringify(PLAN))); }catch(e){ handleWriteErr(e); } },400);
+  renderPlan();
+}
+const ALT_OF = {"Lima":154,"Paracas":5,"Huacachina":400,"Huaraz":3052,"Cusco":3399,"Ollantaytambo":2792,"Vale Sagrado":2870,"Aguas Calientes":2040,"Santa María":1300,"Santa Teresa":1550,"Hotel de luxo em Paracas":5};
+const altOfSleep = s => ALT_OF[s] ?? (VALE_LUX.some(id=>ITEM[id].name===s) ? 2870 : null);
+const altOfItem = id => { const a=ITEM[id]?.alt; if(!a) return null; const m=a.replace(/\./g,"").match(/(\d{3,4})/); return m?+m[1]:a.includes("nível")?0:null; };
+function hrsOf(id){ const d=(ITEM[id]?.dur||"").toLowerCase();
+  if(/noite/.test(d)) return 0; if(ITEM[id].cat==="cidade") return /meio dia/.test(d)?3:4;
+  if(/4 dias|3 dias|2 dias|4–5/.test(d)) return 8; if(/dia inteiro|1 dia/.test(d)) return 9; if(/meio dia/.test(d)) return 4;
+  const m=d.match(/(\d+)(?:h(\d+))?(?:\s*[–-]\s*(\d+))?/); if(m){ const a=+m[1]+(m[2]?+m[2]/60:0); return m[3]?(a+ +m[3])/2:a; }
+  if(/almoço|refeição|jantar/.test(d)) return 1.5; if(/drinque|bebida|lanche|sobremesa|entrada/.test(d)) return 0.7; if(/min/.test(d)) return 1; return 2; }
+
+/* ---- choices ---- */
+let _pdKey=null,_pdVal=null;
+function planDefaults(){ const key=tier+optPrio+JSON.stringify(VOTES)+JSON.stringify(ADJ); if(key===_pdKey) return _pdVal; _pdKey=key; return _pdVal=_planDefaults(); }
+function _planDefaults(){ const best=rankOptimized(optimize(),allOptions()).list[0]; const sp=best?.spec||{core:"train",costa:3,huaraz:0,vale:0,lima:0,free:1};
+  return {core:sp.core,costa:sp.costa,huaraz:sp.huaraz,vale:sp.vale,lima:sp.lima,lux:"auto",parLux:"auto",train:"auto",mp:"auto",dinner:"none",dates:(duelAvg("dates")||0)>0?"sex":"sab"}; }
+function planChoices(){ return {...planDefaults(), ...PLAN.choices}; }
+function fixedDays(core){ return 3+(core==="train"?3:4); }
+function specFrom(ch){
+  const sp={core:ch.core,costa:+ch.costa||0,huaraz:+ch.huaraz||0,vale:+ch.vale||0};
+  if(sp.costa&&sp.huaraz){ sp.huaraz=0; }
+  let rem=10-fixedDays(sp.core)-sp.costa-sp.huaraz-sp.vale;
+  while(rem<(sp.huaraz?1:0)){ if(sp.vale){sp.vale=0;} else if(sp.costa===3){sp.costa=2;} else if(sp.huaraz===3){sp.huaraz=2;} else if(sp.costa){sp.costa=0;} else if(sp.huaraz){sp.huaraz=0;} else break; rem=10-fixedDays(sp.core)-sp.costa-sp.huaraz-sp.vale; }
+  let lima = ch.lima==null?0:+ch.lima; lima=Math.max(sp.huaraz?1:0,Math.min(rem,lima));
+  sp.lima=lima; sp.free=rem-lima;
+  sp.freePick=[0,1,2,3].map(i=>ch["free"+i]||"auto"); sp.lux=ch.lux; sp.parLux=ch.parLux; sp.train=ch.train; sp.mp=ch.mp;
+  return sp;
+}
+function planEval(ch){ const sp=specFrom(ch); const o=evalSpec(sp); if(o) o.spec=sp; return o; }
+
+/* ---- schedule ---- */
+function planSchedule(o){
+  const removed=new Set(PLAN.removed||[]); const manual=PLAN.manual||{}; const placedManual=new Set(Object.values(manual).flat());
+  const homeIds=d=>[...d.ids,...(d.extras||[]).filter(it=>it.cat!=="prato").map(it=>it.id)];
+  const days=o.days.map((d,i)=>{ const fixed=homeIds(d).filter(id=>ITEM[id] && !removed.has(id) && !placedManual.has(id));
+    return {...d, i, fixed, man:[], all:[]}; });
+  for(const [k,ids] of Object.entries(manual)) for(const id of ids){ if(!ITEM[id]) continue; let di=Math.min(+k,days.length-1);
+    if(days[di].s==="em voo" && !fitsDay(id,days[di])){ const alt=days.find(d=>fitsDay(id,d)&&d.s!=="em voo"); if(alt) di=alt.i; }
+    if(!days[di].fixed.includes(id)&&!days[di].man.includes(id)) days[di].man.push(id); }
+  days.forEach(d=>d.all=[...d.fixed,...d.man]);
+  if(PLAN.choices.dinner && PLAN.choices.dinner!=="none" && !days.some(d=>d.all.includes(PLAN.choices.dinner))){
+    const li=[...days].reverse().find(d=>d.r==="lima"&&d.s==="Lima")||days[0]; li.fixed.push(PLAN.choices.dinner); li.all.push(PLAN.choices.dinner); }
+  return days;
+}
+function fixedHome(o,id){ return o.days.findIndex(d=>d.ids.includes(id)||(d.extras||[]).some(it=>it.id===id&&it.cat!=="prato")); }
+function fitsDay(id,day){ const it=ITEM[id]; return it.region==="peru" || it.region===day.r || (day.r==="vale"&&it.region==="cusco"&&day.s==="Cusco") || (day.r==="mp"&&it.cat==="trem") || (day.s==="Lima"&&it.region==="lima"); }
+function moveItem(id,target){ // target: day index or "bank"
+  const o=planEval(planChoices()); const home=fixedHome(o,id);
+  const manual={...(PLAN.manual||{})}; for(const k in manual) manual[k]=manual[k].filter(x=>x!==id);
+  let removed=(PLAN.removed||[]).filter(x=>x!==id);
+  if(target==="bank"){ if(home>=0) removed.push(id); if(PLAN.choices.dinner===id) PLAN.choices.dinner="none"; }
+  else { if(home!==target){ if(home>=0) removed.push(id); (manual[target] ||= []).push(id); } }
+  PLAN.manual=manual; PLAN.removed=removed; savePlan();
+}
+function dayWarnings(day,days){
+  const w=[]; const hrs=dayHours(day);
+  if(hrs>12.5) w.push(`Dia cheio: ~${Math.round(hrs)}h entre passeios e deslocamento.`);
+  const heavy=day.all.filter(id=>ITEM[id].eff===2&&!["machu-picchu"].includes(id)); if(heavy.length>1) w.push(`${heavy.map(i=>ITEM[i].name).join(" e ")} no mesmo dia é puxado demais.`);
+  const prev=days[day.i-1]; if(prev && dayEff(prev)===2 && dayEff(day)===2) w.push("Dois dias pesados seguidos.");
+  for(const id of day.all){ const it=ITEM[id];
+    if(it.routes==="f") w.push(`${it.name} não cabe em 10 dias com Machu Picchu.`);
+    if(!fitsDay(id,day) && it.routes!=="f") w.push(`${it.name} fica em ${REGIONS[it.region]}; neste dia vocês estão em ${REGIONS[day.r]||day.s}.`);
+    const a=altOfItem(id); if(a>=4000){ const nightsHigh=days.slice(0,day.i).filter(d=>(altOfSleep(d.s)||0)>=2500).length; if(nightsHigh<2) w.push(`${it.name} (${it.alt}) com só ${nightsHigh} noite${nightsHigh!==1?"s":""} na altitude: risco de soroche.`); }
+  }
+  if(day.s==="em voo" && day.all.length) w.push("Dia de voo: só cabe algo bem curto em Lima entre os voos.");
+  return w;
+}
+const dayHours = d => d.all.reduce((s,id)=>s+hrsOf(id),0) + (d.all.some(id=>FREE_POOL.includes(id)&&hrsOf(id)>=8)?0:d.h);
+const dayEff = d => Math.max(d.e||0, ...d.all.map(id=>ITEM[id].eff===2&&hrsOf(id)>=6?2:0));
+function planCost(o,days,ch=PLAN.choices){
+  const adds=o.adds.filter(a=>!a[0].startsWith("Encaixes")).reduce((s,a)=>s+a[1],0);
+  const fixedSet=new Set(o.days.flatMap(d=>d.ids));
+  const extra=days.flatMap(d=>d.man).filter(id=>!fixedSet.has(id)).reduce((s,id)=>s+(ITEM[id].cat==="hotel"?0:ITEM[id].price),0)
+    + (ch.dinner&&ch.dinner!=="none"&&!days.some(d=>d.man.includes(ch.dinner))?ITEM[ch.dinner].price:0);
+  return o.base + (adds+extra)*INFL;
+}
+function planCoverage(o,days){ const inPlan=new Set([...days.flatMap(d=>d.all),...[...o.incl].filter(id=>["hotel","trem"].includes(ITEM[id]?.cat))]);
+  let want=0,got=0; for(const it of ITEMS){ if(["prato","trem"].includes(it.cat)) continue; const v=c(it.id); if(v<6) continue; want+=v-5; if(inPlan.has(it.id)) got+=v-5; }
+  return {pct:want?got/want*100:0, inPlan}; }
+
+/* ---- bundles ---- */
+const BUNDLES=[
+ {name:"Miraflores a pé e de bike",region:"lima",ids:["miraflores","huaca-pucllana","bike-malecon","larcomar"],dur:"meio dia",how:"Tudo no mesmo calçadão de 6 km. Bike ~S/ 30 a hora. Bom para o dia da chegada."},
+ {name:"Fim de tarde em Barranco",region:"lima",ids:["barranco","mate","dedalo","isolina"],dur:"~5h",how:"Vá a pé pelo Malecón ou Uber (15 min). Termina com jantar."},
+ {name:"Centro de Lima + Barrio Chino",region:"lima",ids:["lima-centro","chifa","bolivar","circuito-agua"],dur:"dia inteiro",how:"Free walking tour de manhã, chifa no almoço, fontes do Circuito Mágico à noite (qua–dom)."},
+ {name:"Mar e deserto perto de Lima",region:"lima",ids:["callao-lobos","pachacamac"],dur:"dia inteiro",how:"Barco no Callao de manhã, Pachacamac à tarde. É o dia 2 do roteiro C."},
+ {name:"Paracas, Ballestas e Huacachina",region:"costa",ids:["paracas","ballestas","jubartes","huacachina","ica-bodegas"],dur:"2–3 dias",how:"Agências vendem pacote com ônibus e passeios saindo de Lima (ex.: hop-on/hop-off da costa). Ballestas só de manhã."},
+ {name:"Huaraz: aclimatação + Laguna 69",region:"huaraz",ids:["huaraz","churup","laguna-69","monterrey"],dur:"3 dias",how:"Churup ou Pastoruri primeiro para aclimatar; Laguna 69 sai às 5h. Termas de Monterrey para relaxar."},
+ {name:"Boleto Turístico de Cusco",region:"cusco",ids:["sacsayhuaman","pisac","moray","ollantaytambo","chinchero","qosqo"],dur:"vale 10 dias",how:"Um ingresso (~S/ 130 por pessoa) cobre 16 sítios. Compre no primeiro sítio e guarde o papel."},
+ {name:"Cusco histórico a pé",region:"cusco",ids:["cusco-centro","qorikancha","san-blas","san-pedro","chocomuseo"],dur:"dia inteiro",how:"Tudo a até 15 min a pé da Plaza de Armas. Ideal para o dia de aclimatação."},
+ {name:"Vale Sagrado clássico",region:"vale",ids:["pisac","feira-pisac","chinchero","ollantaytambo"],dur:"dia inteiro",how:"Tour de dia inteiro saindo de Cusco (7h–19h) ou motorista privado, terminando em Ollantaytambo para o trem."},
+ {name:"Maras + Moray",region:"vale",ids:["moray","maras","quadriciclo","mil"],dur:"meio dia",how:"De carro ou quadriciclo. Almoço no MIL, ao lado de Moray (reserve)."},
+ {name:"Machu Picchu completo",region:"mp",ids:["aguas-termas","machu-picchu","huayna-picchu"],dur:"2 dias",how:"Durma em Aguas Calientes, primeiro ônibus para a cidadela, Huayna Picchu no ingresso combinado."},
+ {name:"Pacote Inca Jungle",region:"mp",ids:["inca-jungle","tirolesa","cocalmayo","machu-picchu"],dur:"4 dias",how:"Agências em Cusco. Confirmem se inclui ingresso de Machu Picchu e o trem de volta."},
+ {name:"Trilhas de um dia saindo de Cusco",region:"cusco",ids:["humantay","palccoyo","vinicunca","ausangate-7"],dur:"1 dia cada",how:"Todas saem de madrugada: escolham uma por dia livre, depois de Machu Picchu."},
+ {name:"Rota de comida de rua",region:"peru",ids:["anticuchos","picarones","ceviche","chicha-morada","pisco-sour"],dur:"encaixe",how:"Anticuchos e picarones à noite, ceviche só no almoço."},
+ {name:"Compras de alpaca e artesanato",region:"peru",ids:["inka-market","kuna","artesanal-cusco","feira-pisac"],dur:"encaixe",how:"Compare preço no Centro Artesanal de Cusco; peças de marca na Kuna."},
+];
+
+/* ---- render ---- */
+function renderPlan(){
+  const v=$("#v-plan"); if(!v || tab!=="plan") return;
+  const y=window.scrollY;
+  const ch=planChoices(); const o=planEval(ch);
+  if(!o){ v.innerHTML=`<div class="empty"><p>Não consegui montar um roteiro com essas escolhas. Voltem para a sugestão otimizada.</p><button class="btn primary" data-plan-reset>Usar sugestão otimizada</button></div>`; bindPlan(v,null,[]); return; }
+  const days=planSchedule(o); const cost=planCost(o,days,ch); const cov=planCoverage(o,days);
+  const heavy=days.filter(d=>dayEff(d)===2).length, transit=Math.round(o.transit);
+  const n1=esc(NAMES.p1), n2=esc(NAMES.p2);
+  const both=ITEMS.filter(it=>sc("p1",it.id)!=null&&sc("p2",it.id)!=null);
+  const love=both.filter(it=>bucketOf(it.id)==="love").sort((a,b)=>combined(b.id)-combined(a.id));
+  const dream=p=>both.filter(it=>sc(p,it.id)>=9&&sc(other(p),it.id)<=6).sort((a,b)=>sc(p,b.id)-sc(p,a.id));
+  const where=id=>{ const d=days.find(d=>d.all.includes(id)); return d?`<span class="pinned">dia ${d.i+1}</span>`:`<span class="cut">fora</span>`; };
+  const chip=(it)=>`<button class="row" data-open="${it.id}"><span class="th">${cover(it)}</span><span class="nm"><b>${esc(it.name)}</b><span>${esc(REGIONS[it.region])} · ${where(it.id)}</span></span><span class="sc"><i style="background:${scoreColor(sc("p1",it.id))}">${sc("p1",it.id)??"–"}</i><i style="background:${scoreColor(sc("p2",it.id))}">${sc("p2",it.id)??"–"}</i></span></button>`;
+  const strongDuels=DUELS.map(d=>({d,v:duelAvg(d.id)})).filter(x=>x.v!=null&&Math.abs(x.v)>=2.5).sort((a,b)=>Math.abs(b.v)-Math.abs(a.v)).slice(0,6);
+
+  // what stays out
+  const cutBoth=both.filter(it=>bucketOf(it.id)==="cut");
+  const wantedOut=ITEMS.filter(it=>!["prato","trem"].includes(it.cat) && c(it.id)>=7 && !cov.inPlan.has(it.id)).sort((a,b)=>c(b.id)-c(a.id));
+  const visited=new Set(days.map(d=>d.r));
+  const whyOut=it=> it.routes==="f"?"não cabe em 10 dias com Machu Picchu" : !visited.has(it.region)&&it.region!=="peru" ? `exige incluir ${REGIONS[it.region]} (veja as escolhas)` : FREE_POOL.includes(it.id)?"disputa um dia livre em Cusco" : it.cat==="hotel"?"escolham na decisão de hotel" : "cabe: arraste do banco para um dia";
+
+  // choices with impact
+  const variant=(k,val)=>{ const ch2={...ch,[k]:val}; const o2=planEval(ch2); if(!o2) return null; const d2=(()=>{ const save=PLAN.choices; PLAN.choices=ch2; const r=planSchedule(o2); PLAN.choices=save; return r; })(); return {cost:planCost(o2,d2,ch2),pct:planCoverage(o2,d2).pct}; };
+  const imp=(k,val)=>{ const r=variant(k,val); if(!r) return `<small>não cabe</small>`; const dc=r.cost-cost, dp=r.pct-cov.pct;
+    if(Math.abs(dc)<150&&Math.abs(dp)<0.5) return `<small>sem diferença</small>`;
+    return `<small>${dc>=0?"+":"−"}${brlK(Math.abs(dc)).replace("R$ ","R$")} · ${dp>=0?"+":""}${Math.round(dp)}%</small>`; };
+  const sp=o.spec; const rem=10-fixedDays(sp.core)-sp.costa-sp.huaraz-sp.vale;
+  const CH=[
+    {k:"core",t:"Como chegar a Machu Picchu",d:"Trem pelo Vale Sagrado (mais confortável) ou 4 dias de aventura pela Inca Jungle.",opts:[["train","Trem + Vale Sagrado"],["ij","Inca Jungle (4 dias)"]]},
+    {k:"costa",t:"Litoral (Paracas, Ballestas, Huacachina)",d:"Única forma de ver pinguins, baleias e dunas. Custa dias de ônibus.",opts:[[0,"Sem litoral"],[2,"Paracas (2 dias)"],[3,"Paracas + Huacachina (3 dias)"]]},
+    {k:"huaraz",t:"Huaraz e a Laguna 69",d:"Montanha e lagoas turquesa, com ônibus noturno. Não cabe junto com o litoral.",opts:[[0,"Sem Huaraz"],[2,"Só Laguna 69 (2 dias)"],[3,"Churup/Pastoruri + Laguna 69 (3 dias)"]]},
+    {k:"vale",t:"Dia extra no Vale Sagrado",d:"Chinchero, Maras, MIL, via ferrata: um dia a mais de vale.",opts:[[0,"Não"],[1,"Sim, mais um dia"]]},
+    {k:"lima",t:`Os ${rem} dia${rem!==1?"s":""} que sobram`,d:"Divida entre Lima (museus, Barranco, comida) e dias livres em Cusco (trilhas).",opts:[...Array(rem+1)].map((_,i)=>i).filter(i=>!(sp.huaraz&&i<1)).map(i=>[i,`Lima ${i} · Cusco ${rem-i}`])},
+    ...[...Array(sp.free)].map((_,i)=>({k:"free"+i,t:`Dia livre ${i+1} em Cusco`,d:"Trilhas saem de madrugada e voltam à noite; o dia leve é para descansar e passear.",opts:[["auto","Automático (maior nota)"],...FREE_POOL.map(id=>[id,ITEM[id].name])]})),
+    ...(sp.core==="train"?[{k:"lux",t:"Noite especial no Vale",d:"Troca a noite em Ollantaytambo. Valores são o extra líquido.",opts:[["auto","Automático"],["none","Hotel padrão"],...VALE_LUX.map(id=>[id,ITEM[id].name.replace(/ \(.*\)/,"")])]}]:[]),
+    ...(sp.costa?[{k:"parLux",t:"Hotel de luxo em Paracas",d:"Resort na baía, extra líquido ~R$ 1.040.",opts:[["auto","Automático"],["yes","Sim"],["no","Não"]]}]:[]),
+    {k:"train",t:"Trem para Machu Picchu",d:"Trecho de 1h40. A diferença está na janela, no lanche e no show.",opts:[["auto","Automático"],["basic","Expedition + Vistadome"],["vistadome","Vistadome"],["observatorio","Observatório"],["inca360","Inca Rail 360°"],...(sp.core==="train"?[["hiram","Hiram Bingham (luxo)"]]:[])]},
+    {k:"mp",t:"Subida extra em Machu Picchu",d:"Ingresso combinado, esgota primeiro.",opts:[["auto","Automático"],["none","Só a cidadela"],["huayna-picchu","Huayna Picchu"],["montana-mp","Montanha Machu Picchu"]]},
+    {k:"dinner",t:"Jantar especial em Lima",d:"Reserva com meses de antecedência.",opts:[["none","Nenhum"],["central","Central"],["maido","Maido"],["kjolle","Kjolle"]]},
+    {k:"dates",t:"Datas",d:"O feriado de 7/9 cai numa terça.",opts:[["sab","Sáb 4 a seg 13/9"],["sex","Sex 3 a dom 12/9"]]},
+  ];
+  const cur=(k)=>{ if(k==="lima") return sp.lima; if(k.startsWith("free")) return ch[k]||"auto"; if(["costa","huaraz","vale"].includes(k)) return sp[k]; return ch[k]; };
+  const choiceHTML=CH.map(x=>`<div class="choice"><div><b>${esc(x.t)}</b><p class="note" style="margin:2px 0 0">${esc(x.d)}</p></div>
+    <div class="opts">${x.opts.map(([val,l])=>{ const on=String(cur(x.k))===String(val); return `<button class="optbtn" aria-pressed="${on}" data-ch="${x.k}" data-val="${esc(val)}">${esc(l)}${on?"":imp(x.k,val)}</button>`; }).join("")}</div></div>`).join("");
+
+  // city order + altitude profile
+  const W=360,H=170,pad=28; const maxA=4800;
+  const pts=days.map((d,i)=>({x:pad+i*(W-pad-10)/9, y:H-22-((altOfSleep(d.s)??(d.s==="no ônibus"?null:154))||0)/maxA*(H-40), s:d.s, peak:Math.max(0,...d.all.map(altOfItem).filter(a=>a!=null))}));
+  const sleepLine=pts.map((p,i)=>`${i?"L":"M"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join("");
+  const peaks=pts.map(p=>p.peak>500?`<circle cx="${p.x}" cy="${(H-22-p.peak/maxA*(H-40)).toFixed(1)}" r="4" fill="var(--maize)"/><line x1="${p.x}" x2="${p.x}" y1="${(H-22-p.peak/maxA*(H-40)).toFixed(1)}" y2="${p.y.toFixed(1)}" stroke="var(--maize)" stroke-dasharray="2 3"/>`:"").join("");
+  const grid=[0,1000,2000,3000,4000].map(a=>{ const yy=(H-22-a/maxA*(H-40)).toFixed(1); return `<line x1="${pad}" x2="${W-6}" y1="${yy}" y2="${yy}" stroke="var(--line)"/><text x="${pad-4}" y="${+yy+3}" text-anchor="end" font-size="9" fill="var(--muted)">${a?a/1000+"k":"0"}</text>`; }).join("");
+  const stops=[]; days.forEach((d,i)=>{ if(["no ônibus","em voo"].includes(d.s)) return; if(!stops.length||stops[stops.length-1].s!==d.s) stops.push({s:d.s,from:i,n:1}); else stops[stops.length-1].n++; });
+  const svg=`<svg viewBox="0 0 ${W} ${H}" class="altchart" role="img" aria-label="Altitude de onde vocês dormem em cada noite">${grid}
+    <path d="${sleepLine}" fill="none" stroke="var(--lake)" stroke-width="3" stroke-linejoin="round"/>${peaks}
+    ${pts.map((p,i)=>`<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="var(--lake)"/><text x="${p.x}" y="${H-6}" text-anchor="middle" font-size="9" fill="var(--muted)">${i+1}</text>`).join("")}</svg>`;
+  const legs=days.filter(d=>d.move).map(d=>`<li><b>Dia ${d.i+1}:</b> ${esc(d.move)} · ${esc(d.t.split(",")[0])}</li>`).join("");
+  const rules=[
+    ["Começa no nível do mar (Lima"+(sp.costa?", litoral":"")+") e só depois sobe.", true],
+    ...(sp.huaraz?[["Huaraz (3.050 m) vem antes de Cusco, passando por Lima: aclimata e não volta atrás.",true]]:[]),
+    [sp.core==="train"?"Depois de chegar em Cusco, desce para dormir no Vale (2.900 m) e em Aguas Calientes (2.040 m): ajuda na aclimatação.":"Antes da Inca Jungle, pelo menos uma noite e um dia leve em Cusco.", sp.core==="train"||sp.free+sp.vale>0],
+    ["Trilhas acima de 4.000 m ficam para depois de Machu Picchu.", !days.some(d=>dayWarnings(d,days).some(w=>w.includes("soroche")))],
+    ["Nunca dois deslocamentos longos no mesmo dia.", true],
+  ];
+
+  // bank
+  const scheduled=new Set(days.flatMap(d=>d.all));
+  let bank=ITEMS.filter(it=>!scheduled.has(it.id) && !isCut(it.id) && !["trem","hotel"].includes(it.cat));
+  if(bankFilter==="top") bank=bank.filter(it=>c(it.id)>=6.5);
+  else if(bankFilter==="here") bank=bank.filter(it=>visited.has(it.region)||it.region==="peru");
+  bank.sort((a,b)=>c(b.id)-c(a.id));
+  const pchip=(id,fixed)=>{ const it=ITEM[id]; const v=combined(id); return `<div class="pchip ${fixed?"fixed":""}" data-item="${id}" tabindex="0"><span class="grip" aria-label="Arrastar">⠿</span><span class="pth">${cover(it)}</span><span class="pnm"><b>${esc(it.name)}</b><small>${esc(it.dur)}${it.alt?" · "+esc(it.alt):""}</small></span>${v!=null?`<i style="background:${scoreColor(v)}">${(Math.round(v*10)/10).toString().replace(".",",")}</i>`:""}</div>`; };
+  const dayHTML=days.map(d=>{ const w=dayWarnings(d,days); const hrs=Math.round(dayHours(d));
+    return `<div class="pday ${w.length?"warn":""}" data-drop="${d.i}"><div class="pday-h"><b>Dia ${d.i+1} · ${esc(d.d)}</b><span>${esc(d.s)} · ~${hrs}h · ${EFF[dayEff(d)]}</span></div>
+      <div class="pday-t">${esc(d.t)}</div>
+      <div class="plist">${d.all.map(id=>pchip(id,d.fixed.includes(id))).join("")||`<div class="pempty">Arraste uma experiência para cá</div>`}</div>
+      ${w.map(x=>`<div class="pw">⚠ ${esc(x)}</div>`).join("")}</div>`; }).join("");
+
+  // bundles
+  const bundles=BUNDLES.map(b=>{ const ids=b.ids.filter(id=>ITEM[id]); const avg=ids.reduce((s,id)=>s+c(id),0)/ids.length; return {...b,ids,avg}; }).sort((a,b)=>b.avg-a.avg);
+  const bundleHTML=bundles.map((b,bi)=>{ const price=b.ids.reduce((s,id)=>s+ITEM[id].price,0); const inPl=b.ids.filter(id=>scheduled.has(id)).length;
+    const fitsDays=days.filter(d=>d.r===b.region||b.region==="peru"||(b.region==="cusco"&&d.r==="vale")||(b.region==="vale"&&d.r==="cusco"));
+    return `<div class="bundle"><div class="bundle-h"><b>${esc(b.name)}</b><span class="note">${esc(b.dur)} · ~${brl(price)} · média ${(Math.round(b.avg*10)/10).toString().replace(".",",")}</span></div>
+      <div class="bundle-items">${b.ids.map(id=>{ const v=combined(id); const low=v!=null&&v<=3; return `<button class="bitem ${scheduled.has(id)?"on":""} ${low?"low":""}" data-open="${id}">${scheduled.has(id)?"✓ ":""}${esc(ITEM[id].name)}${v!=null?` · ${Math.round(v)}`:""}</button>`; }).join("")}</div>
+      <p class="note" style="margin:0">${esc(b.how)}</p>
+      <div class="bundle-a">${inPl===b.ids.length?`<span class="pinned">tudo na agenda</span>`:`<label class="note">Pôr no <select data-bsel="${bi}">${(fitsDays.length?fitsDays:days).map(d=>`<option value="${d.i}">dia ${d.i+1} (${esc(d.s)})</option>`).join("")}</select></label><button class="btn small" data-badd="${bi}">Adicionar ${b.ids.filter(id=>!scheduled.has(id)&&!(combined(id)!=null&&combined(id)<=3)).length}</button>`}</div></div>`; }).join("");
+
+  v.innerHTML=`
+  <div class="sec"><h2>Plano da viagem</h2><p class="lead">A análise das respostas de vocês e um quadro para montar a agenda juntos. Tudo aqui é compartilhado: o que um muda, o outro vê.${PLAN.by&&PLAN.updatedAt?` Última mudança: ${esc(NAMES[PLAN.by]||"")}.`:""}</p>
+    <div class="kpis kpis4"><div class="kpi"><b>${Math.round(cov.pct)}%</b><span>do que vocês querem</span></div><div class="kpi"><b>${brlK(cost).replace("R$ ","")}</b><span>R$ total (${TIERS[tier]})</span></div><div class="kpi"><b>${transit}h</b><span>deslocamento</span></div><div class="kpi"><b>${heavy}</b><span>dias pesados</span></div></div></div>
+
+  <div class="sec"><h2>Prioridades de vocês</h2>
+    <div class="bucket"><h3><span class="sw" style="background:var(--good)"></span>Os dois querem muito<span class="count">${love.length}</span></h3><div class="rows">${love.slice(0,14).map(chip).join("")||`<p class="note">Nenhum item com 8+ dos dois.</p>`}</div></div>
+    ${[["p1",n1],["p2",n2]].map(([p,n])=>{ const d=dream(p); return d.length?`<div class="bucket"><h3><span class="sw" style="background:${p==="p1"?"var(--lake)":"var(--accent)"}"></span>O sonho de ${n}<span class="count">${d.length}</span></h3><p class="note" style="margin:-6px 0 0">${n} deu 9 ou 10, ${p==="p1"?n2:n1} deu 6 ou menos. Vale conversar.</p><div class="rows">${d.slice(0,6).map(chip).join("")}</div></div>`:""; }).join("")}
+    ${strongDuels.length?`<div class="panel"><b>O que os duelos dizem</b><ul class="list-in">${strongDuels.map(({d,v})=>{ const A=sideInfo(d.a),B=sideInfo(d.b); return `<li>${esc(d.q)} <b>${esc(duelText(Math.round(v),A,B))}</b></li>`; }).join("")}</ul></div>`:""}
+  </div>
+
+  <div class="sec"><h2>O que fica de fora</h2>
+    ${wantedOut.length?`<div class="bucket"><h3><span class="sw" style="background:var(--warn)"></span>Vocês querem, mas não está no plano<span class="count">${wantedOut.length}</span></h3><div class="rows">${wantedOut.slice(0,12).map(it=>`<button class="row" data-open="${it.id}"><span class="th">${cover(it)}</span><span class="nm"><b>${esc(it.name)}</b><span>${esc(whyOut(it))}</span></span><span class="sc"><i style="background:${scoreColor(c(it.id))}">${Math.round(c(it.id))}</i></span></button>`).join("")}</div></div>`:`<p class="note">Tudo que vocês deram 7+ está no plano.</p>`}
+    ${cutBoth.length?`<div class="bucket"><h3><span class="sw" style="background:var(--bad)"></span>Cortaram juntos<span class="count">${cutBoth.length}</span></h3><p class="note" style="margin:-6px 0 0">${cutBoth.map(it=>esc(it.name)).join(", ")}.</p></div>`:""}
+  </div>
+
+  <div class="sec"><h2>Escolhas que vocês precisam fazer</h2><p class="lead">Cada botão mostra quanto a opção muda o custo total e o match. Ao escolher, a agenda abaixo se remonta. O que vocês arrastaram continua no mesmo dia.</p>
+    <div class="choices">${choiceHTML}</div>
+    <div class="actions"><button class="btn small" data-plan-reset>Voltar para a sugestão otimizada</button><button class="btn small" data-plan-clear>Desfazer arrastes</button></div></div>
+
+  <div class="sec"><h2>Ordem das cidades</h2><p class="lead">A linha azul é a altitude onde vocês dormem; os pontos amarelos, o ponto mais alto de cada dia.</p>
+    <div class="panel">${svg}<div class="stops">${stops.map((s,i)=>`<span class="stop">${i?"→ ":""}<b>${esc(s.s)}</b> ${s.n} noite${s.n>1?"s":""}${altOfSleep(s.s)!=null?` · ${altOfSleep(s.s).toLocaleString("pt-BR")} m`:""}</span>`).join("")}</div></div>
+    <ul class="checks">${rules.map(([t,ok])=>`<li class="${ok?"ok":"no"}">${ok?"✓":"!"} ${esc(t)}</li>`).join("")}</ul>
+    <details class="more"><summary>Deslocamentos dia a dia</summary><ul class="list-in">${legs}</ul></details></div>
+
+  <div class="sec"><h2>Agenda</h2><p class="lead">Arrastem pelo ⠿ para mover entre os dias, ou toquem numa experiência para escolher o dia. Os alertas avisam sobre altitude, cansaço e cidade errada.</p>
+    <div class="planner">
+      <div class="pdays">${dayHTML}</div>
+      <div class="pbank" data-drop="bank"><div class="pbank-h"><b>Banco de experiências</b><div class="chips" style="margin:0">${[["top","Notas altas"],["here","Nas cidades do plano"],["all","Todas"]].map(([k,l])=>`<button class="chip" aria-pressed="${bankFilter===k}" data-bank="${k}">${l}</button>`).join("")}</div></div>
+        <div class="plist">${bank.map(it=>pchip(it.id,false)).join("")||`<div class="pempty">Nada aqui com esse filtro.</div>`}</div></div>
+    </div></div>
+
+  <div class="sec"><h2>Passeios que combinam</h2><p class="lead">Agrupados por proximidade, ingresso ou pacote vendido junto. Itens em vermelho tiveram nota baixa: ficam de fora ao adicionar.</p>
+    <div class="bundles">${bundleHTML}</div></div>`;
+  bindPlan(v,o,days);
+  window.scrollTo(0,y);
+}
+function bindPlan(v,o,days){
+  bindCommon(v);
+  v.querySelectorAll("[data-ch]").forEach(b=>b.onclick=()=>{ const k=b.dataset.ch; let val=b.dataset.val; if(["costa","huaraz","vale","lima"].includes(k)) val=+val;
+    PLAN.choices={...planChoices(),[k]:val};
+    if(k==="costa"&&val&&PLAN.choices.huaraz) PLAN.choices.huaraz=0; if(k==="huaraz"&&val&&PLAN.choices.costa) PLAN.choices.costa=0;
+    savePlan(); });
+  v.querySelectorAll("[data-plan-reset]").forEach(b=>b.onclick=()=>{ PLAN.choices={}; savePlan(); toast("Voltou para a sugestão otimizada"); });
+  v.querySelectorAll("[data-plan-clear]").forEach(b=>b.onclick=()=>{ PLAN.manual={}; PLAN.removed=[]; savePlan(); toast("Arrastes desfeitos"); });
+  v.querySelectorAll("[data-bank]").forEach(b=>b.onclick=()=>{ bankFilter=b.dataset.bank; renderPlan(); });
+  v.querySelectorAll("[data-badd]").forEach(b=>b.onclick=()=>{ const bi=+b.dataset.badd; const sel=v.querySelector(`[data-bsel="${bi}"]`); const day=+sel.value;
+    const bs=BUNDLES.map(x=>({...x,avg:x.ids.reduce((s,id)=>s+c(id),0)/x.ids.length})).sort((a,b)=>b.avg-a.avg)[bi];
+    const sched=new Set(days.flatMap(d=>d.all)); const add=bs.ids.filter(id=>ITEM[id]&&!sched.has(id)&&!(combined(id)!=null&&combined(id)<=3));
+    const manual={...(PLAN.manual||{})}; manual[day]=[...(manual[day]||[]),...add]; PLAN.manual=manual; PLAN.removed=(PLAN.removed||[]).filter(x=>!add.includes(x)); savePlan(); toast(`${add.length} adicionado${add.length!==1?"s":""} ao dia ${day+1}`); });
+  // tap a chip: move menu
+  v.querySelectorAll(".pchip").forEach(el=>el.addEventListener("click",e=>{ if(e.target.closest(".grip")||dragState?.moved) return; openMoveMenu(el.dataset.item,days); }));
+  v.querySelectorAll(".pchip .grip").forEach(g=>g.addEventListener("pointerdown",startDrag));
+}
+function openMoveMenu(id,days){
+  closeSheet(); const it=ITEM[id]; const s=document.createElement("div"); s.className="sheet";
+  const cur=days.findIndex(d=>d.all.includes(id));
+  s.innerHTML=`<div class="sheet-in"><div class="grab"></div><h3>${esc(it.name)}</h3><p class="note">${esc(REGIONS[it.region])} · ${esc(it.dur)}${it.alt?" · "+esc(it.alt):""}</p>
+    <div class="movegrid">${days.map(d=>`<button class="btn small" data-mv="${d.i}" ${d.i===cur?"disabled":""}>Dia ${d.i+1}<small>${esc(d.s)}</small></button>`).join("")}</div>
+    <div class="actions" style="margin-top:12px">${cur>=0?`<button class="btn small" data-mv="bank">Tirar da agenda</button>`:"<span></span>"}<button class="btn small" data-open="${id}">Ver card</button><button class="btn small" data-close>Fechar</button></div></div>`;
+  s.addEventListener("click",e=>{ const b=e.target.closest("[data-mv]"); if(b){ s.remove(); moveItem(id,b.dataset.mv==="bank"?"bank":+b.dataset.mv); return; }
+    const op=e.target.closest("[data-open]"); if(op){ s.remove(); openItem(op.dataset.open); return; }
+    if(e.target===s||e.target.closest("[data-close]")) s.remove(); });
+  document.body.append(s);
+}
+/* pointer-based drag and drop (works with touch: the ⠿ handle has touch-action:none) */
+let dragState=null;
+function startDrag(e){
+  const chipEl=e.target.closest(".pchip"); if(!chipEl) return; e.preventDefault();
+  const r=chipEl.getBoundingClientRect(); const ghost=chipEl.cloneNode(true); ghost.classList.add("ghost"); ghost.style.width=r.width+"px";
+  document.body.append(ghost); chipEl.classList.add("dragging");
+  dragState={id:chipEl.dataset.item, el:chipEl, ghost, dx:e.clientX-r.left, dy:e.clientY-r.top, over:null, moved:false};
+  moveGhost(e.clientX,e.clientY);
+  window.addEventListener("pointermove",onDrag,{passive:false}); window.addEventListener("pointerup",endDrag); window.addEventListener("pointercancel",endDrag);
+}
+function moveGhost(x,y){ const g=dragState.ghost; g.style.transform=`translate(${x-dragState.dx}px,${y-dragState.dy}px)`; }
+function onDrag(e){ if(!dragState) return; e.preventDefault(); dragState.moved=true; moveGhost(e.clientX,e.clientY);
+  const t=document.elementFromPoint(e.clientX,e.clientY)?.closest("[data-drop]");
+  if(dragState.over!==t){ dragState.over?.classList.remove("over"); t?.classList.add("over"); dragState.over=t; }
+  const edge=90; if(e.clientY<edge) window.scrollBy(0,-14); else if(e.clientY>innerHeight-edge-60) window.scrollBy(0,14); }
+function endDrag(){ if(!dragState) return; const {id,over,ghost,el}=dragState; ghost.remove(); el.classList.remove("dragging"); over?.classList.remove("over");
+  window.removeEventListener("pointermove",onDrag); window.removeEventListener("pointerup",endDrag); window.removeEventListener("pointercancel",endDrag);
+  const st=dragState; setTimeout(()=>{ if(dragState===st) dragState=null; },50);
+  if(over){ const t=over.dataset.drop; moveItem(id,t==="bank"?"bank":+t); } }
 
 /* ---------- onboarding ---------- */
 function openOnboarding(){
@@ -1789,7 +2145,7 @@ function clearMine(kind){
 }
 
 /* ---------- nav ---------- */
-const TABS=["cards","duels","match","routes","chat"];
+const TABS=["cards","duels","match","routes","plan","chat"];
 function go(t){ tab=t; if(location.hash!=="#"+t) history.replaceState(null,"","#"+t); closeSheet(); render(); window.scrollTo(0,0); }
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
 $("#whoBtn").onclick=openOnboarding;
